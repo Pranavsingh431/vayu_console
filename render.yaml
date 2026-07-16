@@ -1,0 +1,73 @@
+# Render blueprint for the Vayu Console API.
+#
+# Apply via the Render dashboard: New → Blueprint → connect this repository.
+# Render reads this file from the repository root.
+#
+# No Docker: the native Python runtime builds faster and is one less moving part.
+# Secrets are declared with `sync: false`, so Render prompts for them on first
+# apply and never stores a value in this file.
+#
+# See docs/deployment.md.
+
+services:
+  - type: web
+    name: vayu-console-api
+    runtime: python
+    plan: free
+    # Closest region to Delhi; keeps latency to Supabase and users sensible.
+    region: singapore
+    rootDir: apps/api
+    healthCheckPath: /health
+
+    buildCommand: pip install --upgrade pip && pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+
+      - key: ENVIRONMENT
+        value: production
+
+      - key: DEBUG
+        value: "false"
+
+      - key: LOG_LEVEL
+        value: INFO
+
+      # Render's log viewer parses JSON, so fields stay queryable.
+      - key: LOG_FORMAT
+        value: json
+
+      # Set to the deployed Vercel URL, e.g. https://vayu-console.vercel.app
+      # A missing entry here is the usual cause of CORS failures in the browser.
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Supabase → Project Settings → Database → Connection string (URI).
+      # Required: the API refuses to boot in production without it.
+      - key: DATABASE_URL
+        sync: false
+
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # Reserved for later phases; leave blank until the features land.
+      - key: REDIS_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: DATA_GOV_API_KEY
+        sync: false
+      - key: NASA_FIRMS_API_KEY
+        sync: false
+      - key: NASA_EARTHDATA_BEARER_TOKEN
+        sync: false
+      - key: COPERNICUS_USERNAME
+        sync: false
+      - key: COPERNICUS_PASSWORD
+        sync: false

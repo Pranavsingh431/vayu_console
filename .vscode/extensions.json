@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.black-formatter",
+    "ms-python.mypy-type-checker",
+    "charliermarsh.ruff",
+    "editorconfig.editorconfig",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml"
+  ]
+}

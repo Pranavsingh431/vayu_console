@@ -1,0 +1,29 @@
+{
+  "name": "vayu-console",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Urban air quality decision intelligence for municipal officers",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@vayu/web",
+    "dev:web": "npm run dev --workspace=@vayu/web",
+    "dev:api": "cd apps/api && .venv/bin/uvicorn app.main:app --reload --port 8000",
+    "build": "npm run build --workspace=@vayu/web",
+    "start": "npm run start --workspace=@vayu/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  }
+}

@@ -1,0 +1,19 @@
+# Prettier formats the JS/TS/CSS/MD side of the repo.
+# Python is owned by black and ruff — see apps/api/pyproject.toml.
+
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+
+apps/api/
+*.py
+
+.venv/
+venv/
+
+package-lock.json
+*.min.js
+*.min.css

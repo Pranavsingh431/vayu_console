@@ -1,0 +1,38 @@
+{
+  "name": "@vayu/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.2",
+    "@tanstack/react-query": "^5.66.0",
+    "@vayu/shared": "*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.474.0",
+    "next": "15.5.20",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "tailwind-merge": "^3.0.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@tanstack/eslint-plugin-query": "^5.66.0",
+    "@types/node": "^20.17.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "15.5.20",
+    "eslint-config-prettier": "^10.0.1",
+    "tailwindcss": "^4.0.0",
+    "tw-animate-css": "^1.2.4",
+    "typescript": "^5.7.3"
+  }
+}

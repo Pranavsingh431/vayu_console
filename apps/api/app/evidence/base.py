@@ -31,6 +31,15 @@ from app.evidence.schemas.evidence import (
     Observation,
 )
 
+# Below this fraction of the seasonal norm, a regional count is treated as a
+# detection gap rather than a real absence of fire. 10% is well clear of ordinary
+# day-to-day variation (which runs ~2x) and comfortably catches the observed
+# collapses (4 against a neighbouring 2,600 is 0.15%).
+COVERAGE_GAP_FRACTION = 0.10
+
+# Below this seasonal norm we are out of fire season, so a low count is real.
+MIN_BASELINE_FOR_GAP_CHECK = 50.0
+
 
 @dataclass(frozen=True, slots=True)
 class FireObservation:
@@ -79,6 +88,30 @@ class EvidenceContext:
     # True when a FIRMS query ran and legitimately returned nothing. Distinguishes
     # "no fires" (evidence against biomass) from "we did not look" (insufficient).
     fires_queried: bool = False
+    # Detections region-wide in this window, regardless of distance from the station.
+    # A near-zero count mid-season means the satellite did not see, not that the
+    # fires stopped: 31 Oct 2019 logged 4 detections between neighbours of 2,600
+    # and 2,612. Without this, a cloudy day reads as evidence AGAINST biomass.
+    regional_detection_count: int | None = None
+    # Typical regional count for this time of year, from surrounding days. The
+    # baseline that makes "anomalously low" mean something.
+    regional_detection_baseline: float | None = None
+
+    @property
+    def satellite_coverage_suspect(self) -> bool:
+        """Whether the satellite plausibly missed this window.
+
+        True when regional detections collapse far below the seasonal norm. Fires
+        do not stop for a day mid-season; cloud cover and missed overpasses do.
+        """
+        if self.regional_detection_count is None or self.regional_detection_baseline is None:
+            return False
+        if self.regional_detection_baseline < MIN_BASELINE_FOR_GAP_CHECK:
+            # Out of season: a low count is genuinely low, not a gap.
+            return False
+        return (
+            self.regional_detection_count < self.regional_detection_baseline * COVERAGE_GAP_FRACTION
+        )
 
     # Static spatial context. Absent until the OSM/wards work lands.
     road_density_km_per_km2: float | None = None

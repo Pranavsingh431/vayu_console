@@ -6,7 +6,7 @@
  * here rather than as undefined at runtime.
  */
 
-import type { HealthResponse, VersionResponse } from "@vayu/shared";
+import type { DecisionReport, EvidenceReport, HealthResponse, VersionResponse } from "@vayu/shared";
 
 import { env } from "./env";
 
@@ -63,10 +63,46 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   health: () => request<HealthResponse>("/health"),
   version: () => request<VersionResponse>("/version"),
+
+  /** The worked Diwali 2019 example. Needs no database, so the demo always loads. */
+  evidenceExample: () => request<EvidenceReport>("/evidence/example"),
+  decisionExample: () => request<DecisionReport>("/decision/example"),
+
+  /** Live evidence for a station-hour. */
+  evidence: (stationId: number, at: string) =>
+    request<EvidenceReport>("/evidence/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ station_id: stationId, at }),
+    }),
+
+  /** Recommendations from an evidence report. The decision engine reads nothing else. */
+  decision: (report: EvidenceReport) =>
+    request<DecisionReport>("/decision/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(report),
+    }),
+
+  stations: () => request<StationSummary[]>("/stations"),
 };
+
+/** A station, for the map. */
+export interface StationSummary {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  provider: string | null;
+}
 
 /** Query keys for TanStack Query, kept in one place to avoid typos. */
 export const queryKeys = {
   health: ["health"] as const,
   version: ["version"] as const,
+  stations: ["stations"] as const,
+  evidenceExample: ["evidence", "example"] as const,
+  decisionExample: ["decision", "example"] as const,
+  evidence: (stationId: number, at: string) => ["evidence", stationId, at] as const,
+  decision: (stationId: number, at: string) => ["decision", stationId, at] as const,
 };

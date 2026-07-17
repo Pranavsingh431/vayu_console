@@ -227,6 +227,12 @@ class EvidenceReport(BaseModel):
     station: str
     station_id: int | None = None
     evaluated_at: dt.datetime = Field(description="The instant being explained (UTC).")
+    # The measured concentration at this station-hour. Not evidence for any
+    # hypothesis — it is the thing the hypotheses are competing to explain, and
+    # the officer's headline. Absent when the station did not report PM2.5.
+    measured_pm25: float | None = Field(
+        default=None, description="Measured PM2.5 (µg/m³). The observed fact, not an inference."
+    )
     generated_at: dt.datetime = Field(description="When this report was produced (UTC).")
 
     evidence: list[EvidenceResult]

@@ -189,6 +189,26 @@ class BiomassEvidenceModule(EvidenceModule):
                 historical_validation=self._validation(),
             )
 
+        # A detection gap must not read as an absence of fire. Regional counts
+        # collapsing far below the seasonal norm means the satellite did not see:
+        # 31 Oct 2019 logged 4 detections between neighbours of 2,600 and 2,612,
+        # and fires do not stop for a day mid-season. Reporting "no fires upwind"
+        # there would be evidence against biomass manufactured from cloud cover.
+        if context.satellite_coverage_suspect:
+            return self.insufficient(
+                (
+                    f"Satellite coverage is suspect for this window: "
+                    f"{context.regional_detection_count} regional detections against a "
+                    f"seasonal norm of ~{context.regional_detection_baseline:.0f}. "
+                    "Fires do not stop for a day mid-season, so this is cloud cover or "
+                    "a missed overpass. The biomass hypothesis cannot be judged, and "
+                    "this is NOT evidence against fire."
+                ),
+                assumptions=self._ASSUMPTIONS,
+                references=self._REFERENCES,
+                historical_validation=self._validation(),
+            )
+
         supporting: list[Observation] = []
         contradicting: list[Observation] = []
 
@@ -308,7 +328,7 @@ class BiomassEvidenceModule(EvidenceModule):
         Many fires with no wind is strong-looking evidence on poor data — exactly
         the state the two-axis design exists to expose.
         """
-        if not context.fires_queried:
+        if not context.fires_queried or context.satellite_coverage_suspect:
             return EvidenceQuality.NO_DATA
         if context.wind_direction_deg is None:
             return EvidenceQuality.POOR

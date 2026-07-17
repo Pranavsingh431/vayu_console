@@ -26,6 +26,11 @@ MEASUREMENT_TOLERANCE = dt.timedelta(minutes=30)
 # Weather is hourly; accept the nearest hour.
 WEATHER_TOLERANCE = dt.timedelta(minutes=90)
 
+# Days either side of the target used to establish the seasonal norm for fire
+# detections. A week is long enough to be stable and short enough to track the
+# steep ramp of stubble season.
+COVERAGE_BASELINE_DAYS = 3
+
 
 def _bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Initial bearing from point 1 to point 2, degrees clockwise from north."""
@@ -75,6 +80,7 @@ class ContextBuilder:
         fires, queried = await self._fires(
             station.lat, station.lon, at, weather.get("wind_direction_deg")
         )
+        regional_count, regional_baseline = await self._regional_coverage(at)
 
         return EvidenceContext(
             station_name=station.name,
@@ -90,6 +96,8 @@ class ContextBuilder:
             boundary_layer_height_m=weather["boundary_layer_height_m"],
             temperature_c=weather["temperature_c"],
             relative_humidity_pct=weather["relative_humidity_pct"],
+            regional_detection_count=regional_count,
+            regional_detection_baseline=regional_baseline,
         )
 
     async def _pollutants(self, station_id: int, at: dt.datetime) -> dict[str, float]:
@@ -213,3 +221,44 @@ class ContextBuilder:
             for r in rows
         ]
         return fires, bool(have_any)
+
+    async def _regional_coverage(self, at: dt.datetime) -> tuple[int | None, float | None]:
+        """Region-wide detections today, and the seasonal norm around it.
+
+        Lets the biomass module tell a cloudy day from a fire-free one. Fires do
+        not stop for a day mid-season, so a regional count collapsing far below its
+        neighbours means the satellite did not see. Verified: 31 Oct 2019 logged 4
+        detections between neighbours of 2,600 and 2,612.
+
+        The baseline is the MEDIAN of the surrounding week, excluding the day
+        itself. Median rather than mean because the gap days are themselves
+        outliers — a mean would let them drag the baseline down and hide the gap
+        they exist to reveal.
+        """
+        day_start = at.replace(hour=0, minute=0, second=0, microsecond=0)
+        row = (
+            await self._session.execute(
+                text("""
+            with daily as (
+                select (acquired_at at time zone 'Asia/Kolkata')::date d, count(*) n
+                from fire_detections
+                where acquired_at >= :lo and acquired_at < :hi
+                group by d
+            )
+            select
+              (select n from daily where d = (:at_day)::date) as today,
+              (select percentile_cont(0.5) within group (order by n)
+                 from daily where d <> (:at_day)::date) as baseline
+            """),
+                {
+                    "lo": day_start - dt.timedelta(days=COVERAGE_BASELINE_DAYS),
+                    "hi": day_start + dt.timedelta(days=COVERAGE_BASELINE_DAYS + 1),
+                    "at_day": day_start.date(),
+                },
+            )
+        ).one_or_none()
+        if row is None:
+            return None, None
+        today = int(row.today) if row.today is not None else 0
+        baseline = float(row.baseline) if row.baseline is not None else None
+        return today, baseline

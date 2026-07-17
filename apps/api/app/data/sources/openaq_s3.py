@@ -37,6 +37,17 @@ _S3_NS = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
 # The archive publishes IST; timestamps carry an explicit +05:30 offset.
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 
+# Missing-data sentinels the CPCB feed emits as if they were readings. -999 is the
+# classic one; values near -476300 were observed in CO. A concentration cannot be
+# negative, so ANY negative value is either a sentinel or an instrument fault, and
+# neither belongs in a mean.
+#
+# Dropped at parse time rather than filtered in queries: a sentinel that reaches
+# the database is a sentinel that some future query will forget to exclude. Phase
+# 1 stored 5 of these in PM2.5 and they had to be excluded by hand at every call
+# site since.
+SENTINEL_VALUES = frozenset({-999.0, -9999.0})
+
 
 @dataclass(frozen=True, slots=True)
 class ArchiveRecord:
@@ -154,6 +165,15 @@ class OpenAQArchive:
                 numeric = float(value)
             except ValueError:
                 logger.debug("unparseable archive row", extra={"row": row})
+                continue
+
+            # A negative concentration is physically impossible. Keeping it would
+            # corrupt every aggregate that touches it.
+            if numeric < 0 or numeric in SENTINEL_VALUES:
+                logger.debug(
+                    "dropped sentinel or impossible value",
+                    extra={"value": numeric, "parameter": row.get("parameter")},
+                )
                 continue
 
             # Rows carry +05:30. Anything naive is IST by convention here; store UTC.

@@ -19,10 +19,16 @@ export default function Home() {
         <p className="mt-4 text-xl text-muted-foreground sm:text-2xl">
           Urban Air Quality Decision Intelligence
         </p>
-        <div className="mt-10 flex items-center gap-4">
+        <div className="mt-10 flex items-center gap-5">
+          <Link
+            href="/console"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          >
+            Open Operations Console
+          </Link>
           <Link
             href="/status"
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
           >
             System status
           </Link>

@@ -95,10 +95,13 @@ class EvidenceAggregator:
         # Display order only. Not a ranking of contribution.
         results.sort(key=lambda r: _STRENGTH_RANK.get(str(r.strength), -1), reverse=True)
 
+        # Negative values are sentinels; `has` already excludes them.
+        pm25 = context.pollutants.get("pm25")
         return EvidenceReport(
             station=context.station_name,
             station_id=context.station_id,
             evaluated_at=context.evaluated_at,
+            measured_pm25=pm25 if pm25 is not None and pm25 >= 0 else None,
             generated_at=dt.datetime.now(dt.UTC),
             evidence=results,
             summary=self._summarise(results),

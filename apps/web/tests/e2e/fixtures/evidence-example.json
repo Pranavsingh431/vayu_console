@@ -1,0 +1,243 @@
+{
+  "station": "Anand Vihar (example)",
+  "station_id": null,
+  "evaluated_at": "2019-10-27T18:00:00Z",
+  "measured_pm25": 1288.0,
+  "generated_at": "2026-07-17T12:59:31.154520Z",
+  "evidence": [
+    {
+      "name": "biomass",
+      "hypothesis": "biomass",
+      "status": "moderate",
+      "strength": "moderate",
+      "evidence_quality": "high",
+      "identification": "strong",
+      "stars": "★★★",
+      "explanation": "Observations substantially favour this hypothesis.",
+      "likelihood_ratio": 20.0,
+      "supporting_observations": [
+        {
+          "label": "28 fire detections upwind within 24h",
+          "value": 28.0,
+          "unit": null,
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Nearest contributing fire",
+          "value": 195.0,
+          "unit": "km",
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T12:00:00Z"
+        },
+        {
+          "label": "Wind direction (from)",
+          "value": 315.0,
+          "unit": "deg",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Boundary layer height",
+          "value": 210.0,
+          "unit": "m",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "contradicting_observations": [],
+      "assumptions": [
+        "FIRMS detections are treated as a proxy for emissions. FRP measures radiated power, not smoke mass; the relationship is assumed monotonic, not calibrated.",
+        "The influence kernel (exponential distance decay, cosine upwind alignment, 24h linear recency) is a modelling choice. Results are sensitive to it.",
+        "Wind at the station is assumed representative of the transport path. In reality wind veers with height and distance over a 200 km trajectory.",
+        "Satellite overpasses are periodic. An absence of detections in the last hours may be an absence of overpass, not an absence of fire."
+      ],
+      "limitations": [
+        "This is evidence of fire influence, not a measure of fire contribution. No µg/m³ attributable to biomass is claimed here.",
+        "Cloud cover suppresses detection. During heavy winter haze the satellite may under-report exactly when the question matters most.",
+        "The kernel cannot distinguish stubble burning from other biomass (landfill fires, crop residue in other states, domestic burning)."
+      ],
+      "historical_validation": [
+        {
+          "experiment": "Stubble season vs non-season",
+          "status": "pending",
+          "detail": "Would be rejected if influence scores fail to separate stubble season from the rest of the year. Not yet run: requires the stubble-season ingest.",
+          "likelihood_ratio": null
+        },
+        {
+          "experiment": "Diwali 2019 (discriminant validity)",
+          "status": "pending",
+          "detail": "Would be rejected if fire influence absorbs the 20:30-00:30 IST firework spike, which is not biomass transport. 1,604 VIIRS detections were present that day, so the confound is real. Not yet run.",
+          "likelihood_ratio": null
+        }
+      ],
+      "references": [
+        "NASA FIRMS VIIRS 375m active fire product (VNP14IMG).",
+        "Kass, R. & Raftery, A. (1995). Bayes Factors. JASA 90(430)."
+      ]
+    },
+    {
+      "name": "traffic",
+      "hypothesis": "traffic",
+      "status": "very_weak",
+      "strength": "very_weak",
+      "evidence_quality": "fair",
+      "identification": "weak",
+      "stars": "★",
+      "explanation": "Observations barely favour this hypothesis over its absence.",
+      "likelihood_ratio": 2.118953945845869,
+      "supporting_observations": [
+        {
+          "label": "NO2",
+          "value": 64.0,
+          "unit": "µg/m³",
+          "source": "openaq_s3",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "NO2/SO2 ratio",
+          "value": 5.82,
+          "unit": null,
+          "source": "openaq_s3",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "contradicting_observations": [
+        {
+          "label": "Hour 23:00 IST is outside commute peaks (07-11, 17-21)",
+          "value": 23.0,
+          "unit": null,
+          "source": "derived",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "assumptions": [
+        "NO2 is treated as a traffic-responsive species. Supported by the COVID lockdown (NO2 -54.4% while SO2 held at -3.7%), but lockdown also stopped construction and industry, so the association is an upper bound.",
+        "SO2 is treated as dominated by point sources (power, industry) rather than traffic. Consistent with SO2 holding flat while traffic stopped.",
+        "The NO2/SO2 ratio is assumed to separate distributed from point-source combustion. Measured LR is 2.11 — weak. It leans, it does not decide.",
+        "Delhi's commute peaks are assumed at 07-11 and 17-21 IST."
+      ],
+      "limitations": [
+        "Traffic has no signal exogenous to the monitor. All evidence here comes from the same chemistry being explained, so it can never be as strong as biomass evidence.",
+        "The COVID calibration cannot separate traffic from construction or industry: all three stopped together.",
+        "NO2 has a short atmospheric lifetime and is also produced by any high-temperature combustion, including generators and industry.",
+        "Road density is not yet ingested, so the spatial term is unavailable."
+      ],
+      "historical_validation": [
+        {
+          "experiment": "COVID lockdown 2020",
+          "status": "accepted",
+          "detail": "Would have been rejected if NO2 had not fallen materially when traffic went to ~0, or if SO2 had fallen with it. Measured over 47 stations / 901,160 rows: NO2 -54.4%, SO2 -3.7%; NO2/SO2 2.82 -> 1.34. The differential the hypothesis requires.",
+          "likelihood_ratio": 2.118953945845869
+        },
+        {
+          "experiment": "Odd-Even II, April 2016",
+          "status": "pending",
+          "detail": "The only unconfounded vehicle window: no stubble, no winter inversion. Weak treatment (2-wheelers and CNG exempt) on 11 stations. Not yet ingested.",
+          "likelihood_ratio": null
+        }
+      ],
+      "references": [
+        "Vayu Console stress test: COVID lockdown 2020, scripts/stress_test.py.",
+        "Kass, R. & Raftery, A. (1995). Bayes Factors. JASA 90(430)."
+      ]
+    },
+    {
+      "name": "industrial",
+      "hypothesis": "industrial",
+      "status": "very_weak",
+      "strength": "very_weak",
+      "evidence_quality": "poor",
+      "identification": "very_weak",
+      "stars": "★",
+      "explanation": "Observations barely favour this hypothesis over its absence.",
+      "likelihood_ratio": null,
+      "supporting_observations": [
+        {
+          "label": "Wind direction (from)",
+          "value": 315.0,
+          "unit": "deg",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "contradicting_observations": [
+        {
+          "label": "SO2",
+          "value": 11.0,
+          "unit": "µg/m³",
+          "source": "openaq_s3",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "SO2 11.0 µg/m³ is below 3x the Delhi median (11.6 µg/m³)",
+          "value": 11.0,
+          "unit": "µg/m³",
+          "source": "derived",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Industrial proximity not ingested — cannot check upwind sources",
+          "value": null,
+          "unit": null,
+          "source": "osm",
+          "observed_at": null
+        }
+      ],
+      "assumptions": [
+        "SO2 is treated as a marker for point-source combustion (coal power, industry). Supported indirectly: SO2 held flat (-6.6%) through the COVID lockdown while NO2 halved (-54.4%), consistent with essential power generation continuing while distributed sources stopped.",
+        "No assumption is made about how much PM2.5 any industrial source contributes. No such estimate is possible from our data."
+      ],
+      "limitations": [
+        "NO natural experiment isolates industry. COVID stopped traffic, construction and industry simultaneously, so it cannot calibrate this hypothesis. This module therefore reports NO likelihood ratio.",
+        "SO2 is measured at only 36 of 96 Delhi stations. At the remainder this module is structurally blind.",
+        "Industrial and power-plant proximity are not yet ingested, so the spatial term is unavailable.",
+        "Absence of an SO2 sensor is not absence of industrial influence. A low or missing reading must never be read as 'industry is not a problem here'."
+      ],
+      "historical_validation": [
+        {
+          "experiment": "COVID lockdown 2020",
+          "status": "uncertain",
+          "detail": "SO2 held roughly flat (-3.7%) while NO2 halved, consistent with power generation remaining essential. But lockdown halted industry alongside traffic, so this cannot isolate the hypothesis. Suggestive, not a validation.",
+          "likelihood_ratio": null
+        },
+        {
+          "experiment": "Dedicated industrial intervention",
+          "status": "pending",
+          "detail": "None exists in our natural experiment table. Without one, this module cannot be calibrated and cannot carry a likelihood ratio.",
+          "likelihood_ratio": null
+        }
+      ],
+      "references": ["Vayu Console stress test: COVID lockdown 2020, scripts/stress_test.py."]
+    }
+  ],
+  "summary": "Evidence: biomass ★★★; traffic ★; industrial ★.",
+  "overall_quality": "poor",
+  "assumptions": [
+    "FIRMS detections are treated as a proxy for emissions. FRP measures radiated power, not smoke mass; the relationship is assumed monotonic, not calibrated.",
+    "The influence kernel (exponential distance decay, cosine upwind alignment, 24h linear recency) is a modelling choice. Results are sensitive to it.",
+    "Wind at the station is assumed representative of the transport path. In reality wind veers with height and distance over a 200 km trajectory.",
+    "Satellite overpasses are periodic. An absence of detections in the last hours may be an absence of overpass, not an absence of fire.",
+    "NO2 is treated as a traffic-responsive species. Supported by the COVID lockdown (NO2 -54.4% while SO2 held at -3.7%), but lockdown also stopped construction and industry, so the association is an upper bound.",
+    "SO2 is treated as dominated by point sources (power, industry) rather than traffic. Consistent with SO2 holding flat while traffic stopped.",
+    "The NO2/SO2 ratio is assumed to separate distributed from point-source combustion. Measured LR is 2.11 — weak. It leans, it does not decide.",
+    "Delhi's commute peaks are assumed at 07-11 and 17-21 IST.",
+    "SO2 is treated as a marker for point-source combustion (coal power, industry). Supported indirectly: SO2 held flat (-6.6%) through the COVID lockdown while NO2 halved (-54.4%), consistent with essential power generation continuing while distributed sources stopped.",
+    "No assumption is made about how much PM2.5 any industrial source contributes. No such estimate is possible from our data."
+  ],
+  "limitations": [
+    "This is evidence of fire influence, not a measure of fire contribution. No µg/m³ attributable to biomass is claimed here.",
+    "Cloud cover suppresses detection. During heavy winter haze the satellite may under-report exactly when the question matters most.",
+    "The kernel cannot distinguish stubble burning from other biomass (landfill fires, crop residue in other states, domestic burning).",
+    "Traffic has no signal exogenous to the monitor. All evidence here comes from the same chemistry being explained, so it can never be as strong as biomass evidence.",
+    "The COVID calibration cannot separate traffic from construction or industry: all three stopped together.",
+    "NO2 has a short atmospheric lifetime and is also produced by any high-temperature combustion, including generators and industry.",
+    "Road density is not yet ingested, so the spatial term is unavailable.",
+    "NO natural experiment isolates industry. COVID stopped traffic, construction and industry simultaneously, so it cannot calibrate this hypothesis. This module therefore reports NO likelihood ratio.",
+    "SO2 is measured at only 36 of 96 Delhi stations. At the remainder this module is structurally blind.",
+    "Industrial and power-plant proximity are not yet ingested, so the spatial term is unavailable.",
+    "Absence of an SO2 sensor is not absence of industrial influence. A low or missing reading must never be read as 'industry is not a problem here'."
+  ],
+  "engine_version": "0.1.0",
+  "data_sources": ["firms_viirs_snpp_sp", "open_meteo_archive", "openaq_s3", "derived", "osm"]
+}

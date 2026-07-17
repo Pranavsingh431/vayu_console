@@ -1,0 +1,29 @@
+[
+  {
+    "id": 62,
+    "name": "Alipur, Delhi - DPCC-6932",
+    "latitude": 28.815329,
+    "longitude": 77.15301,
+    "provider": null,
+    "first_observed_at": "2019-10-19T18:45:00Z",
+    "last_observed_at": "2020-04-30T18:15:00Z"
+  },
+  {
+    "id": 83,
+    "name": "Anand Vihar, Delhi - DPCC-10487",
+    "latitude": 28.646835,
+    "longitude": 77.316032,
+    "provider": null,
+    "first_observed_at": "2019-10-19T18:45:00Z",
+    "last_observed_at": "2020-04-30T03:00:00Z"
+  },
+  {
+    "id": 80,
+    "name": "Ashok Vihar, Delhi - DPCC-8917",
+    "latitude": 28.695381,
+    "longitude": 77.181665,
+    "provider": null,
+    "first_observed_at": "2019-10-19T18:45:00Z",
+    "last_observed_at": "2020-04-30T18:30:00Z"
+  }
+]

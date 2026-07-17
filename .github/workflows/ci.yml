@@ -80,6 +80,23 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Install Playwright browser
+        run: npx --workspace=@vayu/web playwright install --with-deps chromium
+
+      # The demo path. Every test maps to something a judge does in five minutes,
+      # and the API is mocked at the network boundary so this needs no database,
+      # no secrets and no sleeping Render instance.
+      - name: E2E (Playwright)
+        run: npm run e2e --workspace=@vayu/web
+
+      - name: Upload E2E report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

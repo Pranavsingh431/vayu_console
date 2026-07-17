@@ -108,7 +108,12 @@ export function StationMap({
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full"
         role="img"
-        aria-label="Station, wind and upwind fires"
+        aria-label={
+          `${evidence.station}: wind from ${windFrom !== null ? `${windFrom.toFixed(0)} degrees` : "an unknown direction"}` +
+          (fires
+            ? `, ${fires} fire detections upwind within 24 hours`
+            : ", no fire detections upwind")
+        }
       >
         <rect width={W} height={H} className="fill-black" />
 

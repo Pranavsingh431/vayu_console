@@ -1,0 +1,284 @@
+{
+  "timestamp": "2019-10-27T18:00:00Z",
+  "generated_at": "2026-07-17T12:59:31.506981Z",
+  "station": "Anand Vihar (example)",
+  "station_id": null,
+  "overall_status": "action_recommended",
+  "summary": "2 recommendation(s) supported by evidence.",
+  "recommendations": [
+    {
+      "id": "REC_PUBLIC_ADVISORY",
+      "title": "Issue a public health advisory for the affected zone",
+      "category": "public_health",
+      "priority": "high",
+      "action": "Issue an advisory recommending that residents limit outdoor exertion and that sensitive groups remain indoors while concentrations stay elevated.",
+      "reason": "An advisory is defensible on the measured concentration alone. It does not depend on knowing the source, which is why it survives even when the attribution evidence is weak or contested.\n\nScope: Does NOT justify emergency resource deployment.",
+      "supporting_evidence": [
+        {
+          "label": "28 fire detections upwind within 24h",
+          "value": 28.0,
+          "unit": null,
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Nearest contributing fire",
+          "value": 195.0,
+          "unit": "km",
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T12:00:00Z"
+        },
+        {
+          "label": "Wind direction (from)",
+          "value": 315.0,
+          "unit": "deg",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Boundary layer height",
+          "value": 210.0,
+          "unit": "m",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "contradicting_evidence": [],
+      "assumptions": [
+        "FIRMS detections are treated as a proxy for emissions. FRP measures radiated power, not smoke mass; the relationship is assumed monotonic, not calibrated.",
+        "The influence kernel (exponential distance decay, cosine upwind alignment, 24h linear recency) is a modelling choice. Results are sensitive to it.",
+        "Wind at the station is assumed representative of the transport path. In reality wind veers with height and distance over a 200 km trajectory.",
+        "Satellite overpasses are periodic. An absence of detections in the last hours may be an absence of overpass, not an absence of fire."
+      ],
+      "limitations": [
+        "The advisory does not reduce emissions. It transfers risk management to residents.",
+        "This is evidence of fire influence, not a measure of fire contribution. No µg/m³ attributable to biomass is claimed here.",
+        "Cloud cover suppresses detection. During heavy winter haze the satellite may under-report exactly when the question matters most.",
+        "The kernel cannot distinguish stubble burning from other biomass (landfill fires, crop residue in other states, domestic burning)."
+      ],
+      "confidence_note": "The strongest recommendation this engine makes, because it rests on a measured concentration rather than on an inferred source.",
+      "references": [
+        "CPCB AQI health breakpoints.",
+        "NASA FIRMS VIIRS 375m active fire product (VNP14IMG).",
+        "Kass, R. & Raftery, A. (1995). Bayes Factors. JASA 90(430)."
+      ],
+      "decision_trace": [
+        {
+          "step": "evidence",
+          "identifier": "biomass",
+          "detail": "biomass evidence: moderate ★★★ (quality high, identification strong)"
+        },
+        {
+          "step": "rule",
+          "identifier": "FIRE_002",
+          "detail": "Moderate biomass evidence. Defensible because: Upwind fires are observed but the influence is not decisive. An advisory and closer observation are proportionate; committing the sprinkling fleet is not."
+        },
+        {
+          "step": "policy",
+          "identifier": "PUBLIC_HEALTH",
+          "detail": "Policy PUBLIC_HEALTH applies."
+        },
+        {
+          "step": "recommendation",
+          "identifier": "REC_PUBLIC_ADVISORY",
+          "detail": "Issue a public health advisory for the affected zone"
+        }
+      ],
+      "triggered_by_rule": "FIRE_002",
+      "policy": "PUBLIC_HEALTH"
+    },
+    {
+      "id": "REC_INCREASE_MONITORING",
+      "title": "Increase monitoring cadence at the affected station",
+      "category": "monitoring_only",
+      "priority": "routine",
+      "action": "Raise the reporting cadence at this station and its neighbours, and flag the episode for review once the window closes.",
+      "reason": "Always defensible: it commits no resources beyond observation and cannot be wrong in the way an intervention can. It is the correct response to uncertainty.\n\nScope: Does NOT justify emergency resource deployment.",
+      "supporting_evidence": [
+        {
+          "label": "28 fire detections upwind within 24h",
+          "value": 28.0,
+          "unit": null,
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Nearest contributing fire",
+          "value": 195.0,
+          "unit": "km",
+          "source": "firms_viirs_snpp_sp",
+          "observed_at": "2019-10-27T12:00:00Z"
+        },
+        {
+          "label": "Wind direction (from)",
+          "value": 315.0,
+          "unit": "deg",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        },
+        {
+          "label": "Boundary layer height",
+          "value": 210.0,
+          "unit": "m",
+          "source": "open_meteo_archive",
+          "observed_at": "2019-10-27T18:00:00Z"
+        }
+      ],
+      "contradicting_evidence": [],
+      "assumptions": [
+        "FIRMS detections are treated as a proxy for emissions. FRP measures radiated power, not smoke mass; the relationship is assumed monotonic, not calibrated.",
+        "The influence kernel (exponential distance decay, cosine upwind alignment, 24h linear recency) is a modelling choice. Results are sensitive to it.",
+        "Wind at the station is assumed representative of the transport path. In reality wind veers with height and distance over a 200 km trajectory.",
+        "Satellite overpasses are periodic. An absence of detections in the last hours may be an absence of overpass, not an absence of fire."
+      ],
+      "limitations": [
+        "Does not reduce emissions or exposure.",
+        "This is evidence of fire influence, not a measure of fire contribution. No µg/m³ attributable to biomass is claimed here.",
+        "Cloud cover suppresses detection. During heavy winter haze the satellite may under-report exactly when the question matters most.",
+        "The kernel cannot distinguish stubble burning from other biomass (landfill fires, crop residue in other states, domestic burning)."
+      ],
+      "confidence_note": "Carries no attribution claim. Recommending observation is never overreach.",
+      "references": [
+        "NASA FIRMS VIIRS 375m active fire product (VNP14IMG).",
+        "Kass, R. & Raftery, A. (1995). Bayes Factors. JASA 90(430)."
+      ],
+      "decision_trace": [
+        {
+          "step": "evidence",
+          "identifier": "biomass",
+          "detail": "biomass evidence: moderate ★★★ (quality high, identification strong)"
+        },
+        {
+          "step": "rule",
+          "identifier": "FIRE_002",
+          "detail": "Moderate biomass evidence. Defensible because: Upwind fires are observed but the influence is not decisive. An advisory and closer observation are proportionate; committing the sprinkling fleet is not."
+        },
+        { "step": "policy", "identifier": "MONITORING", "detail": "Policy MONITORING applies." },
+        {
+          "step": "recommendation",
+          "identifier": "REC_INCREASE_MONITORING",
+          "detail": "Increase monitoring cadence at the affected station"
+        }
+      ],
+      "triggered_by_rule": "FIRE_002",
+      "policy": "MONITORING"
+    }
+  ],
+  "assumptions": [
+    "FIRMS detections are treated as a proxy for emissions. FRP measures radiated power, not smoke mass; the relationship is assumed monotonic, not calibrated.",
+    "The influence kernel (exponential distance decay, cosine upwind alignment, 24h linear recency) is a modelling choice. Results are sensitive to it.",
+    "Wind at the station is assumed representative of the transport path. In reality wind veers with height and distance over a 200 km trajectory.",
+    "Satellite overpasses are periodic. An absence of detections in the last hours may be an absence of overpass, not an absence of fire.",
+    "NO2 is treated as a traffic-responsive species. Supported by the COVID lockdown (NO2 -54.4% while SO2 held at -3.7%), but lockdown also stopped construction and industry, so the association is an upper bound.",
+    "SO2 is treated as dominated by point sources (power, industry) rather than traffic. Consistent with SO2 holding flat while traffic stopped.",
+    "The NO2/SO2 ratio is assumed to separate distributed from point-source combustion. Measured LR is 2.11 — weak. It leans, it does not decide.",
+    "Delhi's commute peaks are assumed at 07-11 and 17-21 IST.",
+    "SO2 is treated as a marker for point-source combustion (coal power, industry). Supported indirectly: SO2 held flat (-6.6%) through the COVID lockdown while NO2 halved (-54.4%), consistent with essential power generation continuing while distributed sources stopped.",
+    "No assumption is made about how much PM2.5 any industrial source contributes. No such estimate is possible from our data."
+  ],
+  "limitations": [
+    "This system does not measure source contributions. Recommendations are derived from evidence for competing hypotheses, not from apportionment.",
+    "Recommendations are generated by deterministic rules. No model and no language model is involved, so the same evidence always yields the same advice.",
+    "The advisory does not reduce emissions. It transfers risk management to residents.",
+    "This is evidence of fire influence, not a measure of fire contribution. No µg/m³ attributable to biomass is claimed here.",
+    "Cloud cover suppresses detection. During heavy winter haze the satellite may under-report exactly when the question matters most.",
+    "The kernel cannot distinguish stubble burning from other biomass (landfill fires, crop residue in other states, domestic burning).",
+    "Does not reduce emissions or exposure."
+  ],
+  "supporting_evidence": [
+    {
+      "label": "28 fire detections upwind within 24h",
+      "value": 28.0,
+      "unit": null,
+      "source": "firms_viirs_snpp_sp",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "Nearest contributing fire",
+      "value": 195.0,
+      "unit": "km",
+      "source": "firms_viirs_snpp_sp",
+      "observed_at": "2019-10-27T12:00:00Z"
+    },
+    {
+      "label": "Wind direction (from)",
+      "value": 315.0,
+      "unit": "deg",
+      "source": "open_meteo_archive",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "Boundary layer height",
+      "value": 210.0,
+      "unit": "m",
+      "source": "open_meteo_archive",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "NO2",
+      "value": 64.0,
+      "unit": "µg/m³",
+      "source": "openaq_s3",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "NO2/SO2 ratio",
+      "value": 5.82,
+      "unit": null,
+      "source": "openaq_s3",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "Wind direction (from)",
+      "value": 315.0,
+      "unit": "deg",
+      "source": "open_meteo_archive",
+      "observed_at": "2019-10-27T18:00:00Z"
+    }
+  ],
+  "contradicting_evidence": [
+    {
+      "label": "Hour 23:00 IST is outside commute peaks (07-11, 17-21)",
+      "value": 23.0,
+      "unit": null,
+      "source": "derived",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "SO2",
+      "value": 11.0,
+      "unit": "µg/m³",
+      "source": "openaq_s3",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "SO2 11.0 µg/m³ is below 3x the Delhi median (11.6 µg/m³)",
+      "value": 11.0,
+      "unit": "µg/m³",
+      "source": "derived",
+      "observed_at": "2019-10-27T18:00:00Z"
+    },
+    {
+      "label": "Industrial proximity not ingested — cannot check upwind sources",
+      "value": null,
+      "unit": null,
+      "source": "osm",
+      "observed_at": null
+    }
+  ],
+  "data_quality": "poor",
+  "requires_human_review": true,
+  "human_review_reasons": [
+    "Data quality is poor. The evidence may be based on sparse or missing observations.",
+    "Historical validation is still pending for: Dedicated industrial intervention, Diwali 2019 (discriminant validity), Odd-Even II, April 2016, Stubble season vs non-season. Those modules have not yet survived a test that could reject them."
+  ],
+  "decision_trace": [
+    { "step": "evidence", "identifier": "biomass", "detail": "moderate ★★★ (quality high)" },
+    { "step": "evidence", "identifier": "traffic", "detail": "very_weak ★ (quality fair)" },
+    { "step": "evidence", "identifier": "industrial", "detail": "very_weak ★ (quality poor)" },
+    { "step": "rule", "identifier": "FIRE_002", "detail": "Moderate biomass evidence." }
+  ],
+  "conflict_note": null,
+  "engine_version": "0.1.0",
+  "evidence_engine_version": "0.1.0"
+}

@@ -100,3 +100,11 @@ data/raw/
 data/processed/
 data/cache/
 !data/README.md
+
+# ---------------------------------------------------------------------------
+# Playwright
+# ---------------------------------------------------------------------------
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/blob-report/
+.playwright/

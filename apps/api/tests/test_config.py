@@ -88,3 +88,41 @@ def test_cors_origins_parses_comma_separated_values() -> None:
     )
 
     assert settings.cors_origin_list == ["http://localhost:3000", "https://vayu.vercel.app"]
+
+
+def test_production_requires_cors_origins() -> None:
+    """A blank CORS_ORIGINS blocks every browser while /health still returns 200.
+
+    Regression: this shipped. The API answered curl in 600ms with
+    `database: ok`, and the deployed console was blank, because the CORS
+    middleware was never added. The failure must be loud at boot.
+    """
+    with pytest.raises(ValidationError, match="CORS_ORIGINS"):
+        Settings(
+            environment=Environment.PRODUCTION,
+            database_url="postgresql://u:p@host:5432/db",
+            cors_origins="",
+            _env_file=None,
+        )
+
+
+def test_production_boots_with_cors_origins_set() -> None:
+    settings = Settings(
+        environment=Environment.PRODUCTION,
+        database_url="postgresql://u:p@host:5432/db",
+        cors_origins="https://vayu-console.vercel.app",
+        _env_file=None,
+    )
+
+    assert settings.cors_origin_list == ["https://vayu-console.vercel.app"]
+
+
+def test_whitespace_only_cors_origins_is_rejected_in_production() -> None:
+    """Whitespace parses to an empty list, which is the same silent failure."""
+    with pytest.raises(ValidationError, match="CORS_ORIGINS"):
+        Settings(
+            environment=Environment.PRODUCTION,
+            database_url="postgresql://u:p@host:5432/db",
+            cors_origins="  ,  ,",
+            _env_file=None,
+        )

@@ -77,9 +77,24 @@ function Unreachable({ error, onRetry }: { error: Error | null; onRetry: () => v
         </h1>
         <p className="mt-2 text-sm text-[#A1A1AA]">
           {unreachable
-            ? "The console is running, but the service that produces evidence is not responding."
+            ? "The console is running, but the browser could not complete a request to the analysis service."
             : "The service responded, but not with a usable report."}
         </p>
+        {unreachable ? (
+          <div className="mt-3 space-y-1.5 text-xs text-[#71717A]">
+            <p>Two causes look identical from here, and the browser will not say which:</p>
+            <p>
+              <span className="text-[#A1A1AA]">The service is down or asleep.</span> On the free
+              tier the first request after idle can take up to a minute.
+            </p>
+            <p>
+              <span className="text-[#A1A1AA]">
+                The service is healthy but refusing this origin.
+              </span>{" "}
+              Its <code className="text-white">CORS_ORIGINS</code> must list this site&apos;s URL.
+            </p>
+          </div>
+        ) : null}
         <button
           onClick={onRetry}
           className="mt-4 rounded-md border border-[#1C1C1C] bg-[#111111] px-3 py-1.5 text-xs font-medium text-white transition-colors duration-150 hover:bg-[#1C1C1C]"

@@ -40,7 +40,11 @@ services:
         value: json
 
       # Set to the deployed Vercel URL, e.g. https://vayu-console.vercel.app
-      # A missing entry here is the usual cause of CORS failures in the browser.
+      #
+      # MUST NOT be blank. An empty value disables the CORS middleware entirely:
+      # /health keeps returning 200 to curl while every browser request is
+      # blocked and the console renders blank. The service now refuses to boot
+      # rather than serve nobody, so Render will surface this at deploy time.
       - key: CORS_ORIGINS
         sync: false
 

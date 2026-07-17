@@ -46,10 +46,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   } catch (cause) {
     // Distinguished from ApiError so the UI can say "cannot reach" rather than
     // reporting a status code that never existed.
+    //
+    // Do NOT assert a cause here. A CORS rejection, a dead server, DNS failure
+    // and an offline client are all indistinguishable from fetch — the browser
+    // deliberately withholds the reason. Saying "is the API running?" sent a real
+    // debugging session down the wrong path while the API was answering curl in
+    // 600ms; the block was CORS.
     throw new ApiUnreachableError(
       cause instanceof Error && cause.name === "TimeoutError"
-        ? `Request to ${url} timed out after ${REQUEST_TIMEOUT_MS}ms.`
-        : `Could not reach ${url}. Is the API running?`,
+        ? `The request to ${url} timed out after ${REQUEST_TIMEOUT_MS / 1000}s.`
+        : `The browser could not complete a request to ${url}. The service may be ` +
+            `unreachable, or it may be running but refusing this origin (CORS). ` +
+            `The browser does not report which.`,
     );
   }
 

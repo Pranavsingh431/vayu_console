@@ -66,18 +66,22 @@ The [`render.yaml`](../render.yaml) blueprint at the repository root declares th
    **vayu-console-api**.
 3. Render prompts for every variable marked `sync: false`. At minimum:
 
-   | Variable       | Value                                  |
-   | -------------- | -------------------------------------- |
-   | `DATABASE_URL` | The Supabase URI from step 1.          |
-   | `CORS_ORIGINS` | Leave blank for now; filled in step 4. |
+   | Variable       | Value                                                                                                                                                    |
+   | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `DATABASE_URL` | The Supabase URI from step 1.                                                                                                                            |
+   | `CORS_ORIGINS` | **Must not be blank.** Use `http://localhost:3000` as a placeholder, then replace with the Vercel URL in step 4. The service refuses to boot without it. |
 
    The rest (Supabase keys, `REDIS_URL`, data-source keys) are unused in Phase 0 and may
    be left blank.
 
 4. **Apply.** First build takes a few minutes.
 
-The blueprint pins `ENVIRONMENT=production`, which makes configuration validation strict:
-**a missing `DATABASE_URL` will stop the service from booting.** That is deliberate — a
+The blueprint pins `ENVIRONMENT=production`, which makes configuration validation
+strict: **a missing `DATABASE_URL` or a blank `CORS_ORIGINS` will stop the service from
+booting.** Both are deliberate. A blank `CORS_ORIGINS` used to be accepted, and it
+silently disabled CORS entirely — `/health` returned 200 to curl with `database: ok`
+while every browser request was blocked and the console rendered blank. An API that
+looks healthy and serves nobody is the worst of both worlds, so it now fails at boot. That is deliberate — a
 deploy that cannot reach its database should fail at startup, not at 3am. If a deploy fails
 immediately, read the boot log; the error names the missing variable.
 

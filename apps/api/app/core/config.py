@@ -153,11 +153,23 @@ class Settings(BaseSettings):
             return self
 
         missing = [name for name in ("database_url",) if getattr(self, name) is None]
+
+        # A blank CORS_ORIGINS silently disables the CORS middleware entirely,
+        # which blocks EVERY browser origin while /health still returns 200 to
+        # curl. The API looks perfectly healthy and the product is unusable. That
+        # is exactly the kind of failure that must be loud at boot rather than
+        # discovered from a blank screen during a demo.
+        if not self.cors_origin_list:
+            missing.append("cors_origins")
+
         if missing:
             raise ValueError(
                 "Missing required environment variables for production: "
                 + ", ".join(sorted(name.upper() for name in missing))
-                + ". Set them in the Render dashboard (see docs/deployment.md)."
+                + ". Set them in the Render dashboard (see docs/deployment.md). "
+                "CORS_ORIGINS must list the browser origins allowed to call this "
+                "API, e.g. https://your-app.vercel.app — without it every request "
+                "from a browser is blocked."
             )
         if self.debug:
             raise ValueError("DEBUG must be false in production.")

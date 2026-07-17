@@ -73,7 +73,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.add_middleware(RequestLoggingMiddleware)
 
-    if settings.cors_origin_list:
+    if not settings.cors_origin_list:
+        # Production refuses to boot in this state (see config validation); in
+        # development, say so rather than leaving a developer to debug a blank
+        # page against an API that answers curl perfectly.
+        logger.warning(
+            "CORS_ORIGINS is empty — every browser request will be blocked while "
+            "curl still succeeds. Set CORS_ORIGINS to your web origin.",
+        )
+    else:
         from fastapi.middleware.cors import CORSMiddleware
 
         app.add_middleware(

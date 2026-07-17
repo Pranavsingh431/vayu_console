@@ -26,11 +26,11 @@ from collections import Counter, defaultdict
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-import httpx  # noqa: E402
+import httpx
 
-from app.core.config import get_settings  # noqa: E402
-from app.data.sources.openaq_s3 import OpenAQArchive  # noqa: E402
-from app.data.validation.validators import validate_coordinates  # noqa: E402
+from app.core.config import get_settings
+from app.data.sources.openaq_s3 import OpenAQArchive
+from app.data.validation.validators import validate_coordinates
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 OUT_DIR = REPO_ROOT / "docs" / "research" / "station_inventory"

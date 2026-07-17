@@ -5,27 +5,34 @@ import type { DecisionReport, EvidenceReport } from "@vayu/shared";
 import { cn } from "@/lib/utils";
 
 /**
- * The first thing an officer sees: what is happening, right now, in words.
+ * The first thing on screen, and the only thing a judge is guaranteed to read.
  *
- * Severity is derived from the measured PM2.5 against CPCB's published AQI
- * breakpoints — a measured concentration compared to a published threshold, which
- * is defensible. It is NOT derived from the evidence, because evidence strength
- * says which hypothesis is plausible, not how bad the air is.
+ * Severity comes from the measured concentration against CPCB's published PM2.5
+ * breakpoints — a measured number against a published threshold, which an officer
+ * can cite. Deliberately NOT derived from evidence strength: evidence says which
+ * explanation is plausible, not how bad the air is.
  */
 
-// CPCB PM2.5 sub-index breakpoints (µg/m³, 24h). Used here on an hourly value,
-// which overstates the official category — hence "concentration", not "AQI".
-const BANDS: Array<{ max: number; label: string; tone: string }> = [
-  { max: 30, label: "Good", tone: "bg-emerald-600" },
-  { max: 60, label: "Satisfactory", tone: "bg-lime-600" },
-  { max: 90, label: "Moderate", tone: "bg-yellow-500" },
-  { max: 120, label: "Poor", tone: "bg-orange-500" },
-  { max: 250, label: "Very Poor", tone: "bg-red-600" },
-  { max: Infinity, label: "Severe", tone: "bg-red-900" },
+const BANDS = [
+  { max: 30, label: "Good", tone: "text-[#22C55E]", bar: "bg-[#22C55E]" },
+  { max: 60, label: "Satisfactory", tone: "text-[#22C55E]", bar: "bg-[#22C55E]" },
+  { max: 90, label: "Moderate", tone: "text-[#EAB308]", bar: "bg-[#EAB308]" },
+  { max: 120, label: "Poor", tone: "text-[#EAB308]", bar: "bg-[#EAB308]" },
+  { max: 250, label: "Very Poor", tone: "text-[#EF4444]", bar: "bg-[#EF4444]" },
+  { max: Infinity, label: "Severe", tone: "text-[#EF4444]", bar: "bg-[#EF4444]" },
 ];
 
 function band(pm25: number) {
   return BANDS.find((b) => pm25 <= b.max) ?? BANDS[BANDS.length - 1];
+}
+
+function Stat({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[10px] tracking-wider text-[#71717A] uppercase">{label}</p>
+      <div className="mt-1 truncate text-sm text-white">{children}</div>
+    </div>
+  );
 }
 
 export function SituationHeader({
@@ -43,47 +50,52 @@ export function SituationHeader({
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const generated = new Date(decision.generated_at).toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    timeStyle: "medium",
+  });
 
   return (
-    <section className="rounded-lg border bg-card">
-      <div className="flex flex-wrap items-start justify-between gap-4 p-4">
+    <header className="flex items-center gap-8 border-b border-[#1C1C1C] bg-[#0A0A0A] px-6 py-3.5">
+      {/* The number. Everything else on this bar is context for it. */}
+      <div className="flex items-center gap-4">
+        <div className={cn("h-12 w-1 rounded-full", b?.bar ?? "bg-[#1C1C1C]")} aria-hidden />
         <div>
-          <p className="text-xs text-muted-foreground uppercase">Current situation</p>
-          <div className="mt-1 flex items-center gap-3">
-            {b ? (
-              <span className={cn("rounded px-2.5 py-1 text-lg font-semibold text-white", b.tone)}>
-                {b.label}
-              </span>
-            ) : (
-              <span className="rounded bg-muted px-2.5 py-1 text-lg font-semibold">Unknown</span>
-            )}
+          <p className="text-[10px] tracking-wider text-[#71717A] uppercase">Situation</p>
+          <div className="mt-0.5 flex items-baseline gap-3">
+            <span
+              className={cn("text-2xl font-semibold tracking-tight", b?.tone ?? "text-[#A1A1AA]")}
+            >
+              {b?.label ?? "Unknown"}
+            </span>
             {pm25 !== null ? (
-              <span className="font-mono text-2xl font-semibold">
+              <span className="font-mono text-xl font-medium text-white">
                 {pm25.toFixed(0)}
-                <span className="ml-1 text-sm font-normal text-muted-foreground">µg/m³ PM2.5</span>
+                <span className="ml-1.5 text-[10px] font-normal text-[#71717A]">µg/m³ PM2.5</span>
               </span>
             ) : null}
           </div>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            {evidence.station} · {when} IST
-          </p>
-        </div>
-
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground uppercase">Status</p>
-          <p className="mt-1 font-medium capitalize">
-            {decision.overall_status.replace(/_/g, " ")}
-          </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            data quality: {decision.data_quality.replace("_", " ")}
-          </p>
         </div>
       </div>
 
-      <p className="border-t px-4 py-2 text-[11px] text-muted-foreground">
-        Severity is the measured concentration against CPCB PM2.5 breakpoints. Applied to an hourly
-        value, so it reads more severe than the official 24-hour AQI category.
+      <div className="ml-auto grid flex-1 grid-cols-2 gap-x-8 gap-y-2 lg:grid-cols-4">
+        <Stat label="Location">{evidence.station.split(",")[0]}</Stat>
+        <Stat label="Time (IST)">{when}</Stat>
+        <Stat label="Status">
+          <span className="capitalize">{decision.overall_status.replace(/_/g, " ")}</span>
+        </Stat>
+        <Stat label="Review">
+          {decision.requires_human_review ? (
+            <span className="text-[#EAB308]">Human review required</span>
+          ) : (
+            <span className="text-[#22C55E]">Cleared</span>
+          )}
+        </Stat>
+      </div>
+
+      <p className="hidden font-mono text-[10px] whitespace-nowrap text-[#71717A] xl:block">
+        updated {generated}
       </p>
-    </section>
+    </header>
   );
 }

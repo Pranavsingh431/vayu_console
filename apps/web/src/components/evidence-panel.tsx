@@ -1,6 +1,8 @@
 "use client";
 
 import type { EvidenceReport, EvidenceResult } from "@vayu/shared";
+
+import type { Scenario } from "@/lib/scenarios";
 import { HYPOTHESIS_LABEL, STRENGTH_LABEL, STRENGTH_STARS } from "@vayu/shared";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -180,24 +182,36 @@ function EvidenceRow({ result }: { result: EvidenceResult }) {
   );
 }
 
-export function EvidencePanel({ report }: { report: EvidenceReport }) {
+export function EvidencePanel({
+  report,
+  scenario,
+}: {
+  report: EvidenceReport;
+  scenario?: Scenario;
+}) {
   return (
-    <section className="rounded-lg border bg-card">
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="font-semibold">Evidence</h2>
-        <span className="text-xs text-muted-foreground">click to expand</span>
+    <>
+      <header className="flex shrink-0 items-center justify-between border-b border-[#1C1C1C] px-4 py-3">
+        <h2 className="text-sm font-medium text-white">Evidence</h2>
+        <span className="text-[10px] text-[#71717A]">select to expand</span>
       </header>
 
-      <div>
+      {/* Not a pie chart, and never will be. Strengths do not sum to 1. */}
+      <div className="panel-scroll min-h-0 flex-1">
+        {scenario && !scenario.complete ? (
+          <p className="border-b border-[#1C1C1C] bg-[#111111] px-4 py-2.5 text-[11px] leading-relaxed text-[#EAB308]">
+            Fire and weather observations were not collected for this window, so the biomass
+            hypothesis cannot be judged. That is a gap in our records, not a finding about the air.
+          </p>
+        ) : null}
         {report.evidence.map((r) => (
           <EvidenceRow key={r.name} result={r} />
         ))}
       </div>
 
-      <footer className="border-t px-4 py-2 text-[11px] text-muted-foreground">
-        Strengths are evidence for independent hypotheses. They do not sum to 100% and are not
-        source shares — this system does not measure source contributions.
+      <footer className="shrink-0 border-t border-[#1C1C1C] px-4 py-2 text-[10px] leading-relaxed text-[#71717A]">
+        Evidence for independent explanations. These do not sum to 100% and are not source shares.
       </footer>
-    </section>
+    </>
   );
 }

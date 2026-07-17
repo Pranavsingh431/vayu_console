@@ -84,7 +84,24 @@ export const api = {
       body: JSON.stringify(report),
     }),
 
-  stations: () => request<StationSummary[]>("/stations"),
+  stations: (at?: string) =>
+    request<StationSummary[]>(`/stations${at ? `?at=${encodeURIComponent(at)}` : ""}`),
+
+  /**
+   * Evidence for a scenario instant, against real ingested data.
+   *
+   * A scenario names a moment, not a station, so this resolves one: ask which
+   * stations were actually reporting then, and take the first. Picking a station
+   * that was offline would render "insufficient evidence" everywhere and read as
+   * a broken demo rather than an honest one.
+   */
+  evidenceForScenario: async (at: string): Promise<EvidenceReport> => {
+    const stations = await api.stations(at);
+    if (!stations.length) {
+      throw new ApiError(`No station was reporting at ${at}.`, 404);
+    }
+    return api.evidence(stations[0].id, at);
+  },
 };
 
 /** A station, for the map. */
@@ -105,4 +122,8 @@ export const queryKeys = {
   decisionExample: ["decision", "example"] as const,
   evidence: (stationId: number, at: string) => ["evidence", stationId, at] as const,
   decision: (stationId: number, at: string) => ["decision", stationId, at] as const,
+  scenarioEvidence: (id: string, at: string, isExample: boolean) =>
+    ["scenario", "evidence", id, at, isExample] as const,
+  scenarioDecision: (id: string, at: string, isExample: boolean) =>
+    ["scenario", "decision", id, at, isExample] as const,
 };

@@ -2,7 +2,7 @@
 
 import type { DecisionReport, Priority, Recommendation } from "@vayu/shared";
 import { AlertTriangle, ArrowRight, ShieldQuestion, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -208,13 +208,36 @@ function ExpectedImpact({ report }: { report: DecisionReport }) {
   );
 }
 
-export function RecommendationPanel({ report }: { report: DecisionReport }) {
+export function RecommendationPanel({
+  report,
+  autoOpenChallenge = false,
+  onChallengeClose,
+}: {
+  report: DecisionReport;
+  autoOpenChallenge?: boolean;
+  onChallengeClose?: () => void;
+}) {
   const [challenging, setChallenging] = useState<Recommendation | null>(null);
 
+  // Presentation Mode opens the first recommendation's Challenge on its own —
+  // the step that shows judges the reasoning rather than describing it.
+  useEffect(() => {
+    if (autoOpenChallenge && report.recommendations.length) {
+      setChallenging(report.recommendations[0]);
+    } else if (!autoOpenChallenge) {
+      setChallenging(null);
+    }
+  }, [autoOpenChallenge, report.recommendations]);
+
+  const close = () => {
+    setChallenging(null);
+    onChallengeClose?.();
+  };
+
   return (
-    <section className="rounded-lg border bg-card">
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="font-semibold">Recommendations</h2>
+    <>
+      <header className="flex shrink-0 items-center justify-between border-b border-[#1C1C1C] px-4 py-3">
+        <h2 className="text-sm font-medium text-white">Recommended action</h2>
         {report.requires_human_review ? (
           <span className="flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 uppercase dark:bg-amber-950 dark:text-amber-300">
             <AlertTriangle className="size-3" aria-hidden />
@@ -299,9 +322,7 @@ export function RecommendationPanel({ report }: { report: DecisionReport }) {
 
       <ExpectedImpact report={report} />
 
-      {challenging ? (
-        <ChallengeDialog recommendation={challenging} onClose={() => setChallenging(null)} />
-      ) : null}
-    </section>
+      {challenging ? <ChallengeDialog recommendation={challenging} onClose={close} /> : null}
+    </>
   );
 }

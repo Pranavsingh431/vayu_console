@@ -2,6 +2,9 @@
 
 import type { EvidenceReport } from "@vayu/shared";
 
+import type { Scenario } from "@/lib/scenarios";
+import { cn } from "@/lib/utils";
+
 /**
  * The spatial picture: the station, the wind, and where the fires are.
  *
@@ -56,7 +59,15 @@ const DELHI: [number, number] = [77.209, 28.6139];
 // kernel is built around.
 const UPWIND_DEGREES = 1.9;
 
-export function StationMap({ evidence }: { evidence: EvidenceReport }) {
+export function StationMap({
+  evidence,
+  scenario,
+  showFires = true,
+}: {
+  evidence: EvidenceReport;
+  scenario?: Scenario;
+  showFires?: boolean;
+}) {
   const windFrom = find(evidence, "Wind direction (from)");
   const fires = fireCount(evidence);
   const biomass = evidence.evidence.find((e) => e.hypothesis === "biomass");
@@ -87,10 +98,10 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
       : null;
 
   return (
-    <section className="overflow-hidden rounded-lg border bg-card">
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="font-semibold">Spatial picture</h2>
-        <span className="text-xs text-muted-foreground">Delhi &amp; upwind stubble belt</span>
+    <>
+      <header className="flex shrink-0 items-center justify-between border-b border-[#1C1C1C] px-4 py-3">
+        <h2 className="text-sm font-medium text-white">Transport geometry</h2>
+        <span className="text-[10px] text-[#71717A]">Delhi &amp; upwind stubble belt</span>
       </header>
 
       <svg
@@ -99,7 +110,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
         role="img"
         aria-label="Station, wind and upwind fires"
       >
-        <rect width={W} height={H} className="fill-slate-50 dark:fill-slate-950" />
+        <rect width={W} height={H} className="fill-black" />
 
         {/* Graticule — orientation, not decoration. */}
         {[74, 75, 76, 77, 78].map((lon) => {
@@ -114,7 +125,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
                 className="stroke-slate-200 dark:stroke-slate-800"
                 strokeWidth={1}
               />
-              <text x={x + 3} y={H - 5} className="fill-slate-400 text-[9px]">
+              <text x={x + 3} y={H - 5} className="fill-[#3F3F46] text-[9px]">
                 {lon}°E
               </text>
             </g>
@@ -132,7 +143,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
                 className="stroke-slate-200 dark:stroke-slate-800"
                 strokeWidth={1}
               />
-              <text x={4} y={y - 4} className="fill-slate-400 text-[9px]">
+              <text x={4} y={y - 4} className="fill-[#3F3F46] text-[9px]">
                 {lat}°N
               </text>
             </g>
@@ -143,26 +154,31 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
         <text
           x={project(75.2, 30.9)[0]}
           y={project(75.2, 30.9)[1]}
-          className="fill-slate-400 text-[10px] font-medium"
+          className="fill-[#52525B] text-[10px] font-medium tracking-wider"
         >
           PUNJAB
         </text>
         <text
           x={project(76.2, 29.4)[0]}
           y={project(76.2, 29.4)[1]}
-          className="fill-slate-400 text-[10px] font-medium"
+          className="fill-[#52525B] text-[10px] font-medium tracking-wider"
         >
           HARYANA
         </text>
 
         {/* Upwind fire cluster. Size encodes count, not extent. */}
         {fireCentre && fires ? (
-          <g>
+          <g
+            className={cn(
+              "transition-opacity duration-300",
+              showFires ? "opacity-100" : "opacity-0",
+            )}
+          >
             <circle
               cx={fireCentre[0]}
               cy={fireCentre[1]}
               r={Math.min(70, 18 + Math.log10(Math.max(fires, 1)) * 16)}
-              className="fill-orange-500/20 stroke-orange-500"
+              className="fill-[#EF4444]/15 stroke-[#EF4444]"
               strokeWidth={1.5}
               strokeDasharray="4 3"
             />
@@ -170,7 +186,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
               x={fireCentre[0]}
               y={fireCentre[1] - 4}
               textAnchor="middle"
-              className="fill-orange-600 text-[11px] font-semibold dark:fill-orange-400"
+              className="fill-[#EF4444] text-[11px] font-semibold"
             >
               {fires.toLocaleString()} fires
             </text>
@@ -178,7 +194,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
               x={fireCentre[0]}
               y={fireCentre[1] + 9}
               textAnchor="middle"
-              className="fill-orange-600/70 text-[9px] dark:fill-orange-400/70"
+              className="fill-[#EF4444]/70 text-[9px]"
             >
               upwind, last 24h
             </text>
@@ -197,7 +213,7 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
                 refY="3"
                 orient="auto"
               >
-                <path d="M0,0 L0,6 L7,3 z" className="fill-sky-600 dark:fill-sky-400" />
+                <path d="M0,0 L0,6 L7,3 z" className="fill-[#A1A1AA]" />
               </marker>
             </defs>
             <line
@@ -205,14 +221,14 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
               y1={windTail[1]}
               x2={dx - 14}
               y2={dy - 14}
-              className="stroke-sky-600 dark:stroke-sky-400"
+              className="stroke-[#A1A1AA]"
               strokeWidth={2.5}
               markerEnd="url(#wind-head)"
             />
             <text
               x={(windTail[0] + dx) / 2}
               y={(windTail[1] + dy) / 2 - 8}
-              className="fill-sky-700 text-[10px] font-medium dark:fill-sky-300"
+              className="fill-[#A1A1AA] text-[10px] font-medium"
             >
               wind {windFrom?.toFixed(0)}°
             </text>
@@ -227,22 +243,22 @@ export function StationMap({ evidence }: { evidence: EvidenceReport }) {
             r={9}
             className={
               biomass?.strength === "strong" || biomass?.strength === "very_strong"
-                ? "fill-red-600 stroke-white"
-                : "fill-slate-700 stroke-white"
+                ? "fill-[#EF4444] stroke-white"
+                : "fill-white stroke-black"
             }
             strokeWidth={2}
           />
-          <text x={dx + 14} y={dy + 4} className="fill-foreground text-[11px] font-semibold">
+          <text x={dx + 14} y={dy + 4} className="fill-white text-[11px] font-semibold">
             {evidence.station.split(",")[0]}
           </text>
         </g>
       </svg>
 
-      <footer className="border-t px-4 py-2 text-[11px] text-muted-foreground">
-        Fires are drawn as an aggregate in the upwind sector at a representative transport distance
-        — not at their true coordinates. The module reasons over total wind-weighted influence, and
-        plotting each detection would imply a precision it does not use.
+      <footer className="shrink-0 border-t border-[#1C1C1C] px-4 py-2 text-[10px] leading-relaxed text-[#71717A]">
+        {scenario && !scenario.complete
+          ? "Fire and weather observations were not collected for this window."
+          : "Fires shown as an aggregate in the upwind sector at representative transport distance, not at true coordinates."}
       </footer>
-    </section>
+    </>
   );
 }

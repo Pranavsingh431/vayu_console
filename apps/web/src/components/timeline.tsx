@@ -90,42 +90,49 @@ const EVENTS: Event[] = [
 ];
 
 const TONE: Record<Event["status"], string> = {
-  calibrated: "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
-  verified: "border-sky-500 bg-sky-50 dark:bg-sky-950/40",
-  pending: "border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40",
-  gap: "border-red-400 bg-red-50 dark:bg-red-950/40",
+  calibrated: "border-l-[#22C55E] bg-[#111111]",
+  verified: "border-l-[#22C55E] bg-[#111111]",
+  pending: "border-l-[#3F3F46] bg-[#0A0A0A]",
+  gap: "border-l-[#EF4444] bg-[#111111]",
 };
 
 const BADGE: Record<Event["status"], string> = {
-  calibrated: "bg-emerald-600 text-white",
-  verified: "bg-sky-600 text-white",
-  pending: "bg-slate-400 text-white",
-  gap: "bg-red-600 text-white",
+  calibrated: "bg-[#22C55E] text-black",
+  verified: "bg-[#22C55E] text-black",
+  pending: "bg-[#27272A] text-[#A1A1AA]",
+  gap: "bg-[#EF4444] text-white",
 };
 
-export function Timeline({ activeYear }: { activeYear?: number }) {
+export function Timeline({
+  activeYear,
+  highlight = false,
+}: {
+  activeYear?: number;
+  highlight?: boolean;
+}) {
   return (
-    <section className="rounded-lg border bg-card">
-      <header className="border-b px-4 py-3">
-        <h2 className="font-semibold">Historical validation</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          The events each module was calibrated and stress-tested against. A module that fails its
-          test is deleted, not reinterpreted.
+    <>
+      <header className="flex shrink-0 items-baseline justify-between border-b border-[#1C1C1C] px-4 py-2.5">
+        <h2 className="text-sm font-medium text-white">Historical validation</h2>
+        <p className="text-[10px] text-[#71717A]">
+          Every module was tested against a real intervention. One that fails is removed, not
+          reinterpreted.
         </p>
       </header>
 
-      <div className="flex gap-3 overflow-x-auto p-4">
+      <div className="panel-scroll flex shrink-0 gap-2.5 overflow-x-auto p-3">
         {EVENTS.map((e) => (
           <div
             key={e.id}
             className={cn(
-              "w-60 shrink-0 rounded border-l-4 p-3",
+              "w-56 shrink-0 rounded-md border border-l-2 border-[#1C1C1C] p-2.5 transition-all duration-200",
               TONE[e.status],
-              activeYear === e.year && "ring-2 ring-primary",
+              activeYear === e.year && "ring-1 ring-white/40",
+              highlight && activeYear === e.year && "ring-2 ring-white",
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium">{e.label}</span>
+              <span className="text-xs font-medium text-white">{e.label}</span>
               <span
                 className={cn(
                   "rounded px-1.5 py-0.5 text-[9px] font-medium uppercase",
@@ -135,15 +142,15 @@ export function Timeline({ activeYear }: { activeYear?: number }) {
                 {e.status}
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-0.5 text-[10px] text-[#71717A]">
               {e.date}
               {e.stations !== null ? ` · ${e.stations} stations` : ""}
             </p>
-            <p className="mt-1 text-[10px] text-muted-foreground/70 uppercase">tests: {e.tested}</p>
-            <p className="mt-1.5 text-[11px] leading-snug">{e.detail}</p>
+            <p className="mt-1 text-[9px] tracking-wider text-[#52525B] uppercase">{e.tested}</p>
+            <p className="mt-1.5 text-[10px] leading-snug text-[#A1A1AA]">{e.detail}</p>
           </div>
         ))}
       </div>
-    </section>
+    </>
   );
 }

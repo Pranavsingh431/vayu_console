@@ -178,26 +178,109 @@ The one source decomposition our data supports:
 - **Honest status:** this is an **association under stated assumptions**, presented as such.
   Not "stubble caused X".
 
-### 5.4 Component C — vehicle and industrial screening indicators (not models)
+### 5.4 Component C — the Evidence Engine
 
-Deliberately **not** learned, because there is nothing to learn them from.
+An earlier draft of this document proposed loose "screening indicators". That was too weak.
+An indicator reported as `Biomass 0.93` is the same if-statement as §3, wearing decimals.
+**A number with two significant figures must have a definition, or it is a heuristic in a
+lab coat.**
 
-| Indicator               | Computed from         | Interpretation                                                                                               |
-| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------ |
-| NO₂/SO₂ ratio           | measured gases        | High ratio → combustion dominated by mobile/distributed sources rather than point sources (literature-based) |
-| Diurnal concordance     | hour-of-day profile   | Twin rush-hour peaks are consistent with traffic                                                             |
-| CO/NO₂ ratio            | measured gases        | Combustion efficiency signature                                                                              |
-| SO₂ level + wind sector | measured + reanalysis | Consistency with a known upwind point source                                                                 |
+Evidence already has a formal definition. Evidence for hypothesis `H` from observation `E`
+is the **likelihood ratio**:
 
-These are **descriptive statistics with literature-based interpretation**, carrying:
+```
+LR(H | E) = P(E | H) / P(E | ¬H)
+```
 
-- no confidence score,
-- no probability,
-- no accuracy,
-- no SHAP.
+This is what "evidence" means in Bayesian statistics, and what a diagnostician computes. It
+has exactly the properties this system needs:
 
-They say _"this is consistent with"_, never _"this is"_. A screening indicator that acquires
-a probability has become an apportionment estimate wearing a disguise.
+1. **LRs do not sum to 1 across hypotheses.** They are not a posterior. Reporting
+   `Vehicle 0.72, Industrial 0.21, Biomass 0.93` is coherent — these are strengths of
+   evidence, not shares of a pie. **A softmax anywhere in this system reintroduces
+   apportionment through the back door.**
+2. **It maps to a published interpretation scale** (Kass & Raftery 1995), so a star rating
+   carries a citation rather than a taste:
+
+   | LR     | Interpretation | Stars |
+   | ------ | -------------- | ----- |
+   | 1–3    | weak           | ★     |
+   | 3–10   | substantial    | ★★    |
+   | 10–30  | strong         | ★★★   |
+   | 30–100 | very strong    | ★★★★  |
+   | >100   | decisive       | ★★★★★ |
+
+3. **It is estimable — but only where `P(E | H)` is observable.** That constraint is what
+   keeps the engine honest; §5.5 is how we satisfy it.
+
+Each module emits `LR`, supporting observations, **contradictory observations**, its
+assumptions, and an **identification status**. It never emits a probability of a source.
+
+### 5.5 Where `P(E | H)` becomes observable: natural experiments as calibration
+
+A natural experiment is a period in which `H` is **known by external fact**. That makes the
+conditional distribution directly measurable rather than assumed:
+
+- COVID lockdown ⇒ traffic ≈ 0, by government order. The observed NO₂ distribution in that
+  window **is** `P(NO₂ | vehicles ≈ 0)`. Measured, not modelled.
+- Normal periods give `P(NO₂ | vehicles normal)`.
+- Their ratio is the vehicle module's LR — calibrated against a real intervention.
+
+This is the load-bearing idea of the redesign, and it is what separates a calibrated
+evidence score from a tuned one. §4 stands: n≈6 is useless for _training a classifier_. But
+each event supplies thousands of station-hours drawn from a **known condition**, which is a
+distributional estimate, not a single labelled draw. Different question, different n.
+
+### 5.6 Identification status per module — the asymmetry is the honesty
+
+The three modules do not survive this equally, and the UI must show it:
+
+| Module         | Calibrating experiment           | Status        | Why                                                                   |
+| -------------- | -------------------------------- | ------------- | --------------------------------------------------------------------- |
+| **Biomass**    | Stubble seasons, FIRMS-confirmed | **Strong**    | Exogenous satellite signal; many seasons; treatment directly observed |
+| **Vehicle**    | COVID 2020 + Odd-Even II 2016    | **Weak**      | See below                                                             |
+| **Industrial** | COVID (partial)                  | **Very weak** | SO₂ at 36 of 96 stations; no intervention isolates industry           |
+
+**Why vehicle is weak.** COVID did not isolate traffic — it stopped traffic, construction
+and much industry simultaneously. `P(NO₂ | vehicles≈0)` estimated from lockdown is really
+`P(NO₂ | most activity ≈ 0)`.
+
+One exception makes it testable anyway: **power generation was essential and kept running.**
+COVID is therefore a _differential_ intervention — traffic ↓↓, power ~unchanged — which
+yields a sharp, discriminating, falsifiable prediction:
+
+> If NO₂ tracks traffic and SO₂ tracks power generation, the **NO₂/SO₂ ratio must collapse
+> during lockdown.** If it does not, NO₂ is not a traffic-specific proxy in Delhi, and the
+> vehicle module is deleted.
+
+**Odd-Even II (April 2016)** is the only unconfounded vehicle window — outside stubble
+season and outside winter inversion. But 11 stations, and the policy exempted two-wheelers
+and CNG, i.e. most of Delhi's fleet: a weak treatment on a small panel.
+
+**Both are calibrated, and both are reported, including where they disagree.** Selecting the
+flattering experiment and omitting the other would be the same dishonesty as inventing
+labels, one level up.
+
+### 5.7 Stress tests are falsification, not validation
+
+Each module must pass tests **written so that they can fail**. Outcome is
+`Accepted / Rejected / Uncertain`.
+
+| Test                           | Module  | Rejects the module if…                                      |
+| ------------------------------ | ------- | ----------------------------------------------------------- |
+| COVID lockdown 2020            | Vehicle | NO₂ does not fall materially when traffic is ~0             |
+| COVID NO₂/SO₂ ratio            | Vehicle | The ratio does not collapse (⇒ NO₂ is not traffic-specific) |
+| Odd-Even II, Apr 2016          | Vehicle | No detectable NO₂ response in an unconfounded window        |
+| Stubble seasons                | Biomass | `Δ_fire` does not track FIRMS counts                        |
+| Diwali (discriminant validity) | Biomass | `Δ_fire` absorbs the firework spike                         |
+
+**A rejected module is deleted from the product**, and the failed test is written up in
+`scientific-limitations.md`. Falsification needs no minimum n — one decisive test kills a
+hypothesis. This is the difference between stress tests that are real and stress tests that
+are ceremonial.
+
+The system will then carry fewer hypotheses, and every survivor will have passed a test it
+could have failed.
 
 ---
 

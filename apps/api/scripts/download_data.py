@@ -75,6 +75,21 @@ STUBBLE_BBOX = (74.0, 28.0, 78.0, 31.0)
 # Burari Crossing — verified to hold 300 rows across 5 pollutants on 2019-10-27.
 DEFAULT_STATION = 5541
 
+# Calibration windows for the Evidence Engine (docs/research/inference.md §5.5).
+# A natural experiment is a period where the hypothesis is known by external fact,
+# which is the only place P(evidence | hypothesis) becomes observable.
+EVENTS: dict[str, tuple[dt.date, dt.date, str]] = {
+    # Diwali 2019 — the Phase 1 gate. Confounded with peak stubble burning.
+    "diwali-2019": (dt.date(2019, 10, 20), dt.date(2019, 11, 3), "fireworks + stubble"),
+    # COVID lockdown — traffic ~0 by order, but construction and industry stopped
+    # too. Power generation stayed essential, which is what makes the NO2/SO2
+    # ratio a discriminating test rather than a confounded one.
+    "covid-2020": (dt.date(2020, 3, 1), dt.date(2020, 4, 30), "traffic ~0 (confounded)"),
+    # Odd-Even II — the only unconfounded vehicle window we have: no stubble, no
+    # winter inversion. Weak treatment (2-wheelers and CNG exempt), 11 stations.
+    "odd-even-2016": (dt.date(2016, 4, 1), dt.date(2016, 5, 15), "partial traffic cut"),
+}
+
 # Parallel S3 reads. The archive is a CDN with no documented rate limit, so the
 # binding constraint is local: at 16 concurrent connections macOS ran out of
 # ephemeral ports mid-run ("Can't assign requested address"). 8 is still ~6x
@@ -315,8 +330,14 @@ async def report_query(parameter: str = "pm25") -> None:
 
 
 async def run_event(args: argparse.Namespace) -> int:
-    start = EVENT_START if args.days is None else DIWALI_2019
-    end = EVENT_END if args.days is None else DIWALI_2019 + dt.timedelta(days=args.days - 1)
+    window = EVENTS.get(args.command)
+    if window is None:
+        print(f"unknown event: {args.command}")
+        return 1
+    ev_start, ev_end, note = window
+    print(f"{args.command}: {ev_start} .. {ev_end}   ({note})")
+    start = ev_start
+    end = ev_end if args.days is None else ev_start + dt.timedelta(days=args.days - 1)
 
     if args.station:
         station_ids = [args.station]
@@ -364,16 +385,17 @@ async def main() -> int:
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    ev = sub.add_parser("diwali-2019", help="Ingest the Diwali 2019 event end-to-end.")
-    ev.add_argument(
-        "--station", type=int, default=None, help=f"One location id, e.g. {DEFAULT_STATION}."
-    )
-    ev.add_argument("--parameter", default=None, help="One pollutant, e.g. pm25.")
-    ev.add_argument(
-        "--days", type=int, default=None, help="Days from Diwali day. Omit for the full window."
-    )
-    ev.add_argument("--skip-fires", action="store_true")
-    ev.add_argument("--skip-weather", action="store_true")
+    for name, (_ev_s, _ev_e, note) in EVENTS.items():
+        ev = sub.add_parser(name, help=f"Ingest {name} end-to-end ({note}).")
+        ev.add_argument(
+            "--station", type=int, default=None, help=f"One location id, e.g. {DEFAULT_STATION}."
+        )
+        ev.add_argument("--parameter", default=None, help="One pollutant, e.g. pm25.")
+        ev.add_argument(
+            "--days", type=int, default=None, help="Days from the window start. Omit for all."
+        )
+        ev.add_argument("--skip-fires", action="store_true")
+        ev.add_argument("--skip-weather", action="store_true")
 
     q = sub.add_parser("query", help="Report what is stored.")
     q.add_argument("--parameter", default="pm25")
@@ -387,7 +409,7 @@ async def main() -> int:
         return 1
 
     try:
-        if args.command == "diwali-2019":
+        if args.command in EVENTS:
             return await run_event(args)
         await report_query(args.parameter)
         return 0

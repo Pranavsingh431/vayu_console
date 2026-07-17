@@ -103,6 +103,9 @@ class Settings(BaseSettings):
     # one is responsible for promoting it to required in `_validate_for_environment`.
     openrouter_api_key: OptionalStr = None
     data_gov_api_key: OptionalStr = None
+    # Discovery of locations/sensors only. Its measurements endpoint returns empty
+    # for history that exists; historical readings come from the keyless S3 archive.
+    openaq_api_key: OptionalStr = None
     nasa_firms_api_key: OptionalStr = None
     nasa_earthdata_bearer_token: OptionalStr = None
     copernicus_username: OptionalStr = None

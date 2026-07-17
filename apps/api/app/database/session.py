@@ -24,6 +24,29 @@ logger = logging.getLogger(__name__)
 _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
 
+# Driver arguments applied to every connection.
+#
+# `prepare_threshold: None` disables psycopg3's implicit prepared statements.
+# Supavisor's transaction mode (port 6543) multiplexes each transaction onto a
+# different backend, while psycopg3 prepares a statement after its 5th execution
+# and names them predictably (_pg3_0, _pg3_1, ...). A name prepared on one backend
+# then collides on another:
+#
+#     psycopg.errors.DuplicatePreparedStatement: prepared statement "_pg3_0" already exists
+#
+# This survives light testing — the collision needs sustained load across several
+# statement shapes — and then fails part-way through a long ingest. Setting it here
+# keeps the app correct on both 5432 and 6543, rather than depending on which URL
+# happens to be configured.
+# `statement_timeout` is raised from Supabase's default because bulk ingest writes
+# thousands of rows per statement; the default cancels them mid-run with
+# "canceling statement due to statement timeout". It is a ceiling, not a target —
+# a serving query that takes 2 minutes is a bug, but an ingest batch legitimately can.
+CONNECT_ARGS: dict[str, object] = {
+    "prepare_threshold": None,
+    "options": "-c statement_timeout=120000",
+}
+
 
 class DatabaseNotConfiguredError(RuntimeError):
     """Raised when a database is required but DATABASE_URL is unset."""
@@ -50,6 +73,7 @@ def get_engine(settings: Settings | None = None) -> AsyncEngine:
             # pooled connection is never handed out already dead.
             pool_recycle=1800,
             pool_pre_ping=True,
+            connect_args=CONNECT_ARGS,
         )
         logger.info("database engine created")
 

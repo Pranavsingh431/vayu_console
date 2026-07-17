@@ -14,6 +14,9 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.36",
     "alembic>=1.14",
     "psycopg[binary]>=3.2",
+    "geoalchemy2>=0.15",
+    "httpx>=0.27",
+    "defusedxml>=0.7",
 ]
 
 [project.optional-dependencies]
@@ -60,7 +63,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101"] # assert is expected in tests
+"tests/*" = ["S101"]    # assert is expected in tests
+"scripts/*" = ["T201"]  # a CLI communicates by printing
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
@@ -82,9 +86,11 @@ strict = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions/"]
+mypy_path = "."
 
 [[tool.mypy.overrides]]
-module = ["alembic.*"]
+# defusedxml ships no type stubs; geoalchemy2's are incomplete.
+module = ["alembic.*", "defusedxml.*", "geoalchemy2.*"]
 ignore_missing_imports = true
 
 # ---------------------------------------------------------------------------

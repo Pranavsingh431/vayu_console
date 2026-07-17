@@ -92,3 +92,11 @@ Thumbs.db
 *.log
 tmp/
 .scratch/
+
+# ---------------------------------------------------------------------------
+# Data (downloads and derivatives, not source)
+# ---------------------------------------------------------------------------
+data/raw/
+data/processed/
+data/cache/
+!data/README.md

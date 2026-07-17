@@ -13,15 +13,37 @@ frontend's URL for CORS. That circularity is resolved in step 4.
 ## 1. Database (Supabase)
 
 1. Create a project at [supabase.com](https://supabase.com). Choose a region close to
-   Delhi — Singapore (`ap-southeast-1`) or Mumbai (`ap-south-1`).
-2. **Project Settings → Database → Connection string → URI.** Copy it. It looks like:
+   Delhi — Mumbai (`ap-south-1`) is nearest, then Singapore (`ap-southeast-1`).
+   The region is fixed at creation and cannot be changed later.
+
+2. **Use the connection pooler URI, not the direct connection.** This is the single
+   most important step, and getting it wrong produces a confusing failure.
+
+   Supabase offers two kinds of host:
+
+   | Kind      | Host                                 | Resolves to   | Works on Render? |
+   | --------- | ------------------------------------ | ------------- | ---------------- |
+   | Direct    | `db.[ref].supabase.co`               | **IPv6 only** | ❌ No            |
+   | Supavisor | `aws-0-[region].pooler.supabase.com` | IPv4 (+IPv6)  | ✅ Yes           |
+
+   The direct host publishes **no A record at all**. Render's outbound network is
+   IPv4-only, so it cannot reach it — the failure looks like this, and names an IPv6
+   address rather than saying anything about IPv6:
+
+   ```
+   connection to server at "2406:da14:...", port 5432 failed: Network is unreachable
+   ```
+
+   In the dashboard press **Connect** (top bar) and copy the **Session pooler** URI.
+   Note that the username changes to `postgres.[ref]`, not plain `postgres`:
 
    ```
    postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres
    ```
 
-   Two ports are offered. Use **5432** (session mode) for migrations; **6543**
-   (transaction mode) is the pooler for serverless workloads.
+   Use **session mode (5432)**: this API is a long-lived server, and Alembic needs
+   session mode for migrations. Transaction mode (6543) is for serverless functions
+   and breaks psycopg's prepared statements unless you disable them.
 
 3. Substitute your real password for `[password]`. If it contains URL-unsafe characters
    (`@ : / ? # &`), percent-encode them or the URL will not parse.
@@ -166,14 +188,16 @@ Confirm with `/version`, which reports the running commit.
 
 ## Troubleshooting
 
-| Symptom                                          | Cause and fix                                                                              |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Render: service exits at boot                    | A required variable is missing. The log names it — usually `DATABASE_URL`.                 |
-| `/health` → `database: unavailable`              | `DATABASE_URL` is wrong or Supabase is unreachable. Check the password is percent-encoded. |
-| `/health` → `database: not_configured`           | `DATABASE_URL` is blank. Blank counts as unset.                                            |
-| CORS error in the browser                        | The Vercel URL is not in `CORS_ORIGINS`. Trailing slashes matter.                          |
-| Status page shows `localhost:8000` in production | `NEXT_PUBLIC_API_BASE_URL` was not set at build time. Redeploy after setting it.           |
-| First request takes 60s                          | Free-plan cold start. Expected.                                                            |
-| Vercel build: cannot resolve `@vayu/shared`      | Root Directory is not `apps/web`, so the workspace was not hoisted.                        |
+| Symptom                                              | Cause and fix                                                                                                                                   |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Network is unreachable`, host looks like `2406:...` | You used the **direct** connection host, which is IPv6-only. Render is IPv4-only. Switch `DATABASE_URL` to the Session pooler URI (see step 2). |
+| `Tenant or user not found`                           | The pooler host's region does not match the project's, or the username is missing the `postgres.[ref]` suffix.                                  |
+| Render: service exits at boot                        | A required variable is missing. The log names it — usually `DATABASE_URL`.                                                                      |
+| `/health` → `database: unavailable`                  | `DATABASE_URL` is wrong or Supabase is unreachable. Check the password is percent-encoded.                                                      |
+| `/health` → `database: not_configured`               | `DATABASE_URL` is blank. Blank counts as unset.                                                                                                 |
+| CORS error in the browser                            | The Vercel URL is not in `CORS_ORIGINS`. Trailing slashes matter.                                                                               |
+| Status page shows `localhost:8000` in production     | `NEXT_PUBLIC_API_BASE_URL` was not set at build time. Redeploy after setting it.                                                                |
+| First request takes 60s                              | Free-plan cold start. Expected.                                                                                                                 |
+| Vercel build: cannot resolve `@vayu/shared`          | Root Directory is not `apps/web`, so the workspace was not hoisted.                                                                             |
 
 _(Later phase)_ Staging environment, migration-on-deploy, uptime monitoring.

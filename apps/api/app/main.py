@@ -42,7 +42,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     A factory rather than a module-level singleton so tests can construct an
     app with alternate settings without mutating global state.
+
+    When `settings` is supplied it is bound to the `get_settings` dependency, so
+    that routes resolve the settings given here rather than the process-wide
+    cached ones. Without that binding the argument would be silently ignored by
+    every route — and a test asking for "no database" would quietly talk to the
+    real one.
     """
+    explicit_settings = settings is not None
     settings = settings or get_settings()
     configure_logging(level=settings.log_level, log_format=settings.log_format)
 
@@ -58,6 +65,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url=None if settings.is_production else "/openapi.json",
     )
     app.state.settings = settings
+
+    if explicit_settings:
+        # Bind the caller's settings to the dependency the routes actually
+        # resolve. `app.state` alone is not enough: nothing reads it per-request.
+        app.dependency_overrides[get_settings] = lambda: settings
 
     app.add_middleware(RequestLoggingMiddleware)
 

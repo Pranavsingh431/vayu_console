@@ -6,6 +6,7 @@ independently of HTTP.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 
@@ -19,6 +20,22 @@ logger = logging.getLogger(__name__)
 
 # A health probe must not hang a load balancer check behind a stalled socket.
 _DB_PROBE_TIMEOUT_SECONDS = 5.0
+
+# Enough to identify the failure, short enough to keep one probe to one log line.
+_CAUSE_MAX_CHARS = 200
+
+
+def _root_cause(exc: BaseException) -> str:
+    """Summarise the innermost cause of a chained exception in one line.
+
+    SQLAlchemy wraps driver errors several layers deep; the sentence that
+    actually says what went wrong ("Network is unreachable") is at the bottom.
+    """
+    current: BaseException = exc
+    while current.__cause__ is not None:
+        current = current.__cause__
+    first_line = str(current).strip().splitlines()[0] if str(current).strip() else repr(current)
+    return first_line[:_CAUSE_MAX_CHARS]
 
 
 class HealthService:
@@ -38,10 +55,28 @@ class HealthService:
         start = time.perf_counter()
         try:
             engine = get_engine(self._settings)
-            async with engine.connect() as connection:
-                await connection.execute(text("SELECT 1"))
+            async with asyncio.timeout(_DB_PROBE_TIMEOUT_SECONDS):
+                async with engine.connect() as connection:
+                    await connection.execute(text("SELECT 1"))
+        except TimeoutError:
+            logger.warning(
+                "database health probe timed out",
+                extra={"timeout_s": _DB_PROBE_TIMEOUT_SECONDS},
+            )
+            return ComponentHealth(
+                status=ComponentStatus.UNAVAILABLE,
+                detail=f"Probe exceeded {_DB_PROBE_TIMEOUT_SECONDS:g}s.",
+                latency_ms=round((time.perf_counter() - start) * 1000, 2),
+            )
         except Exception as exc:
-            logger.warning("database health probe failed", exc_info=exc)
+            # Render probes /health every few seconds. A full traceback per probe
+            # buries every other log line, so summarise here and keep the stack
+            # behind DEBUG for when it is actually being investigated.
+            logger.warning(
+                "database health probe failed",
+                extra={"error": type(exc).__name__, "cause": _root_cause(exc)},
+            )
+            logger.debug("database health probe traceback", exc_info=exc)
             return ComponentHealth(
                 status=ComponentStatus.UNAVAILABLE,
                 detail=type(exc).__name__,

@@ -81,9 +81,9 @@ strict: **a missing `DATABASE_URL` or a blank `CORS_ORIGINS` will stop the servi
 booting.** Both are deliberate. A blank `CORS_ORIGINS` used to be accepted, and it
 silently disabled CORS entirely — `/health` returned 200 to curl with `database: ok`
 while every browser request was blocked and the console rendered blank. An API that
-looks healthy and serves nobody is the worst of both worlds, so it now fails at boot. That is deliberate — a
-deploy that cannot reach its database should fail at startup, not at 3am. If a deploy fails
-immediately, read the boot log; the error names the missing variable.
+looks healthy and serves nobody is the worst of both worlds, so it now fails at boot.
+
+If a deploy fails immediately, read the boot log — the error names the missing variable.
 
 Verify:
 

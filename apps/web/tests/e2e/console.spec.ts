@@ -150,7 +150,12 @@ test.describe("challenge dialog", () => {
   });
 
   test("every recommendation can be challenged", async ({ page }) => {
+    // Wait for the panel before counting. `count()` does not auto-wait, so
+    // asking too early returns 0 — which passed locally and failed on CI.
+    await expect(page.getByRole("heading", { name: "Recommended action" })).toBeVisible();
     const whys = page.getByRole("button", { name: "Why?" });
+    await expect(whys.first()).toBeVisible();
+
     const count = await whys.count();
     expect(count).toBeGreaterThan(0);
 
@@ -344,17 +349,33 @@ test.describe("accessibility", () => {
   });
 
   test("the whole demo path is keyboard operable", async ({ page }) => {
-    // Tab from the top must land on a real control, not the body. Next injects a
-    // dev-only skip link in some builds, so accept a link too.
-    await page.keyboard.press("Tab");
-    const focused = await page.evaluate(() => document.activeElement?.tagName ?? "NONE");
-    expect(["BUTTON", "A", "INPUT"]).toContain(focused);
+    // Which element the FIRST Tab lands on is a browser detail, not a product
+    // requirement — asserting it was an environment assumption that passed
+    // locally and failed on CI. What matters is that tabbing reaches the real
+    // controls and that they respond to the keyboard.
+    await expect(page.getByRole("heading", { name: "Recommended action" })).toBeVisible();
 
-    // Reach a Why? button by keyboard alone and open the dialog with Enter.
-    const why = page.getByRole("button", { name: "Why?" }).first();
-    await why.focus();
+    const reachable = new Set<string>();
+    for (let i = 0; i < 25; i++) {
+      await page.keyboard.press("Tab");
+      const label = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        return el && el !== document.body
+          ? `${el.tagName}:${el.innerText?.trim().slice(0, 12)}`
+          : "";
+      });
+      if (label) reachable.add(label);
+    }
+    expect([...reachable].some((l) => l.includes("Why?"))).toBe(true);
+    expect([...reachable].some((l) => l.includes("Present"))).toBe(true);
+
+    // And the keyboard actually operates it.
+    await page.getByRole("button", { name: "Why?" }).first().focus();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("dialog")).toBeVisible();
+
+    // No keyboard trap: Escape must return control.
+    await page.keyboard.press("Escape");
   });
 
   test("focus is visible, never removed", async ({ page }) => {

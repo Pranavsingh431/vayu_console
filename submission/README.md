@@ -2,14 +2,16 @@
 
 Everything a judge or reviewer needs, in the order it is most useful.
 
-| Document                                               | Read it for                                                                         |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| [demo-script.md](demo-script.md)                       | The five-minute walkthrough, timed.                                                 |
-| [judge-faq.md](judge-faq.md)                           | Hard questions and their answers, including the ones we expect to be challenged on. |
-| [pitch-outline.md](pitch-outline.md)                   | Ten-slide structure with speaker notes.                                             |
-| [scientific-methodology.md](scientific-methodology.md) | Why this is screening rather than apportionment, and what that buys.                |
-| [technical-highlights.md](technical-highlights.md)     | The engineering findings worth a reviewer's time.                                   |
-| [known-limitations.md](known-limitations.md)           | What the system cannot do, stated plainly.                                          |
+| Document                                               | Read it for                                                                                                                                                       |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [technical-document.pdf](technical-document.pdf)       | **The main submission item.** 18 pages: architecture, evidence engine maths, validation, limitations. Source: [`technical-document.tex`](technical-document.tex). |
+| [final-presentation.pdf](final-presentation.pdf)       | The 13-slide deck, also as [.pptx](final-presentation.pptx).                                                                                                      |
+| [demo-script.md](demo-script.md)                       | The five-minute walkthrough, timed.                                                                                                                               |
+| [judge-faq.md](judge-faq.md)                           | Hard questions and their answers, including the ones we expect to be challenged on.                                                                               |
+| [pitch-outline.md](pitch-outline.md)                   | Ten-slide structure with speaker notes.                                                                                                                           |
+| [scientific-methodology.md](scientific-methodology.md) | Why this is screening rather than apportionment, and what that buys.                                                                                              |
+| [technical-highlights.md](technical-highlights.md)     | The engineering findings worth a reviewer's time.                                                                                                                 |
+| [known-limitations.md](known-limitations.md)           | What the system cannot do, stated plainly.                                                                                                                        |
 
 Screenshots live in [`../docs/assets/screenshots/`](../docs/assets/screenshots/) and are
 captured from the running application by `npm run screenshots --workspace apps/web`. They are

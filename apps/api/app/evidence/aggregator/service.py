@@ -23,6 +23,7 @@ from app.evidence.schemas.evidence import (
     EvidenceReport,
     EvidenceResult,
     EvidenceStrength,
+    hypothesis_prose,
 )
 from app.evidence.traffic.module import TrafficEvidenceModule
 
@@ -129,18 +130,19 @@ class EvidenceAggregator:
             )
 
         parts = [
-            f"{r.hypothesis} {STRENGTH_STARS.get(EvidenceStrength(str(r.strength)), '')}".strip()
+            f"{hypothesis_prose(r.hypothesis)} "
+            f"{STRENGTH_STARS.get(EvidenceStrength(str(r.strength)), '')}".strip()
             for r in judged
         ]
         blind = [
-            r.hypothesis
+            hypothesis_prose(r.hypothesis)
             for r in results
             if str(r.strength) == EvidenceStrength.INSUFFICIENT_EVIDENCE.value
         ]
         sentence = "Evidence: " + "; ".join(parts) + "."
         if blind:
             sentence += (
-                f" Could not judge: {', '.join(str(b) for b in blind)} — required "
+                f" Could not judge: {', '.join(blind)} — required "
                 "observations unavailable, which is not evidence of absence."
             )
         return sentence

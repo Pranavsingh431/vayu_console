@@ -24,6 +24,7 @@ from app.evidence.schemas.evidence import (
     Identification,
     Observation,
     ValidationStatus,
+    hypothesis_prose,
 )
 
 # 18:00 UTC == 23:30 IST — Diwali's firework peak, outside any commute window.
@@ -213,7 +214,8 @@ class TestIndustrialEvidence:
             )
         )
 
-        assert any("industrial" in limit for limit in d.limitations)
+        # Named in the prose form the officer reads, not the wire identifier.
+        assert any(hypothesis_prose(Hypothesis.INDUSTRIAL) in limit for limit in d.limitations)
         assert any("not evidence of absence" in limit for limit in d.limitations)
 
     def test_industrial_never_recommends_inspection_or_restriction(self) -> None:

@@ -66,6 +66,43 @@ class EvidenceQuality(StrEnum):
     HIGH = "high"
 
 
+# --- Prose forms -----------------------------------------------------------
+#
+# The enum values above are stable wire identifiers and must not change. These
+# are how the same concepts read inside a sentence shown to an officer.
+#
+# Taking a `str` rather than the enum is deliberate: these models are validated
+# with plain string values at runtime, which is why call sites throughout the
+# engines wrap comparisons in `str(...)`. Interpolating the raw identifier put
+# "Data quality is no_data." and "missing for: biomass, industrial" on screen,
+# both of which read as unfinished strings rather than the deliberate statements
+# they are.
+
+_HYPOTHESIS_PROSE: dict[str, str] = {
+    Hypothesis.BIOMASS.value: "fire/biomass",
+    Hypothesis.TRAFFIC.value: "traffic",
+    Hypothesis.INDUSTRIAL.value: "industry/power",
+}
+
+_QUALITY_PROSE: dict[str, str] = {
+    EvidenceQuality.NO_DATA.value: "unavailable",
+    EvidenceQuality.POOR.value: "poor",
+    EvidenceQuality.FAIR.value: "fair",
+    EvidenceQuality.GOOD.value: "good",
+    EvidenceQuality.HIGH.value: "high",
+}
+
+
+def hypothesis_prose(hypothesis: str) -> str:
+    """A hypothesis as it reads in a sentence. Falls back to the raw value."""
+    return _HYPOTHESIS_PROSE.get(str(hypothesis), str(hypothesis))
+
+
+def quality_prose(quality: str) -> str:
+    """A data-quality level as it reads in a sentence. Falls back to the raw value."""
+    return _QUALITY_PROSE.get(str(quality), str(quality))
+
+
 class ValidationStatus(StrEnum):
     """Whether a module has survived falsification against a natural experiment.
 

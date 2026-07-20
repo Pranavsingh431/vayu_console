@@ -31,6 +31,8 @@ from app.evidence.schemas.evidence import (
     EvidenceResult,
     EvidenceStrength,
     Hypothesis,
+    hypothesis_prose,
+    quality_prose,
 )
 
 # Ranks for comparing strengths. INSUFFICIENT sits below VERY_WEAK because it is
@@ -244,7 +246,11 @@ def detect_conflict(report: EvidenceReport) -> str | None:
     stubble season, fireworks and transported smoke arrive together. Picking one
     would be apportionment.
     """
-    strong = [str(r.hypothesis) for r in report.evidence if at_least(r, EvidenceStrength.MODERATE)]
+    strong = [
+        hypothesis_prose(r.hypothesis)
+        for r in report.evidence
+        if at_least(r, EvidenceStrength.MODERATE)
+    ]
     if len(strong) < 2:
         return None
     return (
@@ -265,7 +271,7 @@ def human_review_reasons(report: EvidenceReport, fired: list[Rule]) -> list[str]
 
     if str(report.overall_quality) in {EvidenceQuality.POOR.value, EvidenceQuality.NO_DATA.value}:
         reasons.append(
-            f"Data quality is {report.overall_quality}. The evidence may be based on "
+            f"Data quality is {quality_prose(report.overall_quality)}. The evidence may be based on "
             "sparse or missing observations."
         )
 
@@ -275,7 +281,7 @@ def human_review_reasons(report: EvidenceReport, fired: list[Rule]) -> list[str]
             "cannot separate them and does not try."
         )
 
-    insufficient = [str(r.hypothesis) for r in report.evidence if is_insufficient(r)]
+    insufficient = [hypothesis_prose(r.hypothesis) for r in report.evidence if is_insufficient(r)]
     if insufficient:
         reasons.append(
             f"Required observations are missing for: {', '.join(sorted(insufficient))}. "

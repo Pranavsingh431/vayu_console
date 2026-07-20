@@ -32,6 +32,7 @@ from app.evidence.schemas.evidence import (
     EvidenceResult,
     Hypothesis,
     Observation,
+    hypothesis_prose,
 )
 
 logger = logging.getLogger(__name__)
@@ -264,7 +265,9 @@ class DecisionEngine:
             "language model is involved, so the same evidence always yields the same "
             "advice.",
         ]
-        insufficient = [str(r.hypothesis) for r in report.evidence if is_insufficient(r)]
+        insufficient = [
+            hypothesis_prose(r.hypothesis) for r in report.evidence if is_insufficient(r)
+        ]
         if insufficient:
             limits.append(
                 f"No recommendation addresses: {', '.join(sorted(insufficient))} — the "

@@ -1,11 +1,22 @@
 /**
  * Demo Mode scenarios.
  *
- * Each scenario is a real station-hour from ingested data — not a fixture. The
- * console calls the same `/evidence/evaluate` and `/decision/evaluate` endpoints a
- * live user would, so what a judge sees is the system working, not a mock.
+ * Every scenario runs the live engines through the same endpoints a real user
+ * would hit, so the reasoning on screen is the system working rather than a
+ * rendered mock. What differs is where each one's *inputs* come from:
  *
- * Two are deliberately incomplete, and that is the point:
+ * - COVID 2020 and Odd-Even II 2016 query real ingested station-hours.
+ * - Diwali 2019 is served by `/evidence/example` from a fixed context held in
+ *   the API. Its pollutant readings are the recorded Anand Vihar values, but
+ *   its fire list is a representative set constructed in code, not a FIRMS
+ *   query. That is why the station renders as "Anand Vihar (example)" — the
+ *   engine output is genuine, the fire inputs to it are illustrative.
+ *
+ * The trade is deliberate: it makes the primary demo path survive a cold
+ * instance and a fresh clone with nothing ingested. It must never be described
+ * as a query against ingested Diwali data.
+ *
+ * Two scenarios are deliberately incomplete, and that is the point:
  *
  * - COVID 2020 and Odd-Even II 2016 were ingested WITHOUT fires or weather. The
  *   biomass module will honestly report insufficient evidence there. That is the

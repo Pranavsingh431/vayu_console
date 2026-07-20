@@ -88,10 +88,12 @@ others in place. A module that fails its test is removed, not reinterpreted.
   This test could have failed. Had NO₂ not fallen relative to SO₂, the traffic module would
   have been deleted.
 
-- **Diwali 2019** (44 stations). Tests discriminant validity: can the fire module absorb
-  fireworks and misreport them as biomass? VIIRS overpasses Delhi at 12:00–14:00 and
-  01:00–03:00 IST, so there were **zero detections** in the 20:00–00:00 firework window. The
-  module is structurally incapable of confusing the two. **VERIFIED.**
+- **Diwali 2019.** Tests discriminant validity: can the fire module absorb fireworks and
+  misreport them as biomass? 1,604 VIIRS detections were present that day, so the confound is
+  real. The structural argument is that VIIRS overpasses Delhi at 12:00–14:00 and 01:00–03:00
+  IST, outside the 20:00–00:00 firework window, so the module should not be able to see
+  fireworks at all. **PENDING** — that is an argument from the satellite's orbit, not a result.
+  The test has not been run, and the engine reports it as pending.
 
 - **Odd-Even II, Apr 2016** (11 stations). The only unconfounded vehicle window — no stubble,
   no winter inversion. Weak treatment on few stations, so it is marked **PENDING** in the UI
@@ -132,9 +134,13 @@ system refuses to guess.
 **Partly, and we are explicit about where the line is.**
 
 The fire module is driven by VIIRS satellite detections of _upwind_ fires 150–250 km away in
-the Punjab/Haryana stubble belt. Fireworks in Delhi are neither upwind nor satellite-detected
-at that scale, so they cannot enter the fire evidence — verified empirically: zero VIIRS
-detections in the 2019 firework window (§ _How do you validate_).
+the Punjab/Haryana stubble belt. Fireworks in Delhi are neither upwind nor detectable by VIIRS
+at that scale, and the satellite's overpasses of Delhi (12:00–14:00 and 01:00–03:00 IST) fall
+outside the 20:00–00:00 firework window entirely.
+
+That is a structural argument from the instrument's orbit and resolution, **not a result we
+have measured**. The discriminant test that would confirm it is declared with its failure
+condition and reported as pending by the engine (§ _How do you validate_).
 
 What we **cannot** do is separate the two contributions to the observed concentration. On
 Diwali night in stubble season both are genuinely present, and the episode is permanently

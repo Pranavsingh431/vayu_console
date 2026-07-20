@@ -24,9 +24,10 @@ project.
 They co-occur every year, in the same weeks, under the same meteorology. This is not a
 sampling problem that more data resolves — the confound is structural.
 
-The system addresses both hypotheses and separates neither. What it _can_ do is show that the
-fire module is structurally incapable of absorbing fireworks (zero VIIRS detections in the
-firework window), which bounds the error without removing the confound.
+The system addresses both hypotheses and separates neither. The structural argument that the
+fire module cannot absorb fireworks (VIIRS overpasses fall outside the firework window) is an
+argument from the satellite's orbit, and the test that would confirm it has not been run. The
+engine reports that test as pending.
 
 ### 3. Traffic is weakly identified, and the LR is an upper bound
 

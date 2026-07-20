@@ -91,11 +91,11 @@ Three things about that number are worth stating:
 Each natural experiment is framed as an attempt to break a module, with the failure condition
 stated before the run:
 
-| Experiment     | Failure condition                                 | Outcome                                                                |
-| -------------- | ------------------------------------------------- | ---------------------------------------------------------------------- |
-| COVID lockdown | NO₂ does not fall relative to SO₂                 | Survived → **ACCEPTED**                                                |
-| Diwali 2019    | Fire module absorbs fireworks as biomass evidence | Survived (zero VIIRS detections in the firework window) → **VERIFIED** |
-| Odd-Even II    | —                                                 | Not yet run to conclusion → **PENDING**, and shown as such             |
+| Experiment     | Failure condition                                 | Outcome                                                                                                       |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| COVID lockdown | NO₂ does not fall relative to SO₂                 | Survived → **ACCEPTED**                                                                                       |
+| Diwali 2019    | Fire module absorbs fireworks as biomass evidence | **PENDING** — not yet run. VIIRS overpass timing argues it cannot, but that is orbital geometry, not a result |
+| Odd-Even II    | —                                                 | Not yet run to conclusion → **PENDING**, and shown as such                                                    |
 
 "PENDING" appears in the UI. A test not yet passed is not quietly presented as a pass.
 

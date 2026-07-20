@@ -3,12 +3,16 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The natural experiments, and what each one tested.
+ * The natural experiments, and what each one tests.
  *
- * This is what makes the historical validation tangible: these are not
- * illustrations, they are the events the evidence modules were calibrated and
- * stress-tested against. The COVID row is why the traffic module exists at all;
- * had NO2 not fallen, the module would have been deleted.
+ * These are the real events each module is judged against, with the failure
+ * condition declared in advance. Status must mirror what the engine reports at
+ * `/evidence/history` — only COVID has actually been run to completion, and the
+ * rest are pending. A card claiming otherwise contradicts the human review panel
+ * on the same screen, which lists the pending ones by name.
+ *
+ * The COVID row is why the traffic module exists at all; had NO2 not fallen, the
+ * module would have been deleted.
  */
 
 interface Event {
@@ -51,9 +55,14 @@ const EVENTS: Event[] = [
     year: 2019,
     stations: 44,
     tested: "Fire discriminant validity",
-    status: "verified",
+    // The engine reports this as PENDING (`/evidence/history`), and the human
+    // review panel on this same screen says so. This card used to claim
+    // VERIFIED, which contradicted both. The overpass argument below is a
+    // structural property of the satellite, not a test result — the test that
+    // would confirm it has not been run.
+    status: "pending",
     detail:
-      "VIIRS overpasses Delhi at 12:00–14:00 and 01:00–03:00 IST — zero detections in the 20:00–00:00 firework window. The biomass module cannot absorb fireworks.",
+      "VIIRS overpasses Delhi at 12:00–14:00 and 01:00–03:00 IST, outside the 20:00–00:00 firework window, so the module should not be able to absorb fireworks. The test that would confirm it has not been run.",
   },
   {
     id: "odd-even-3",
@@ -114,8 +123,11 @@ export function Timeline({
     <>
       <header className="flex shrink-0 items-baseline justify-between border-b border-[#1C1C1C] px-4 py-2.5">
         <h2 className="text-sm font-medium text-white">Historical validation</h2>
+        {/* Was "Every module was tested against a real intervention", which
+            overclaimed: only the traffic module has completed a test. The rest
+            are declared with their failure condition and still pending. */}
         <p className="text-[10px] text-[#71717A]">
-          Every module was tested against a real intervention. One that fails is removed, not
+          Each module declares the intervention that would reject it. One that fails is removed, not
           reinterpreted.
         </p>
       </header>

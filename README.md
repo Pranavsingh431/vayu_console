@@ -59,11 +59,11 @@ whether it was right. Historical episodes in which a known intervention changed 
 not the others are the only way to test whether the engine's logic survives contact with
 reality.
 
-| Scenario           | Station-hour           | What it demonstrates                                                                                                                                                                                              |
-| ------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diwali 2019**    | 27 Oct 2019, 23:30 IST | Fireworks and peak stubble season arrive together. Strong fire evidence, weak traffic evidence — the engine addresses both without choosing between them.                                                         |
-| **COVID lockdown** | 15 Apr 2020            | Traffic stopped by national order: the natural experiment that calibrated the traffic module. Fires and weather were never ingested for this window, so the biomass hypothesis returns **insufficient evidence**. |
-| **Odd-Even II**    | 20 Apr 2016            | The only unconfounded vehicle window in the record — no stubble, no winter inversion. Weak treatment on few stations, and the engine reports no more than that.                                                   |
+| Scenario           | Station-hour           | What it demonstrates                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diwali 2019**    | 27 Oct 2019, 23:30 IST | Fireworks and peak stubble season arrive together. Moderate fire evidence, very weak traffic evidence — the engine addresses both without choosing between them. Served as a **worked example** from a fixed context: the pollutant readings are the recorded Anand Vihar values, the fire list is representative and constructed in code, and the station renders as "Anand Vihar (example)". The engine output is genuine; these particular fire inputs are illustrative. |
+| **COVID lockdown** | 15 Apr 2020            | Traffic stopped by national order: the natural experiment that calibrated the traffic module. Fires and weather were never ingested for this window, so the biomass hypothesis returns **insufficient evidence**.                                                                                                                                                                                                                                                           |
+| **Odd-Even II**    | 20 Apr 2016            | The only unconfounded vehicle window in the record — no stubble, no winter inversion. Weak treatment on few stations, and the engine reports no more than that.                                                                                                                                                                                                                                                                                                             |
 
 **GRAP is deliberately absent.** It is a threshold-triggered regulatory regime rather than a
 dated event, so there is no single station-hour to reconstruct. The console shows it as
@@ -169,14 +169,19 @@ Detail: [`docs/research/inference.md`](docs/research/inference.md),
 
 ## Validation
 
-Modules are tested against real interventions. **A module that fails its test is removed, not
-reinterpreted.**
+Each module declares, up front, the real intervention that would reject it. **A module that
+fails its test is removed, not reinterpreted.**
 
-| Experiment         | Date         | Scope                     | Result                                                                                                                                                                                                 |
-| ------------------ | ------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **COVID lockdown** | Mar–Apr 2020 | 47 stations, 901,160 rows | NO₂ −54.4%, SO₂ −3.7%. NO₂/SO₂ ratio 2.82 → 1.34, **LR 2.11 (weak)**. Power generation stayed essential, so SO₂ held while NO₂ halved — the differential the hypothesis required. **ACCEPTED.**        |
-| **Diwali 2019**    | 27 Oct 2019  | 44 stations               | VIIRS overpasses Delhi at 12:00–14:00 and 01:00–03:00 IST — **zero detections** in the 20:00–00:00 firework window. The biomass module is structurally incapable of absorbing fireworks. **VERIFIED.** |
-| **Odd-Even II**    | Apr 2016     | 11 stations               | The only unconfounded vehicle window. Weak treatment, few stations. **PENDING** — not yet a passed test, and labelled as such in the UI.                                                               |
+**One test has been run to completion: COVID, on the traffic module.** The other two are
+declared with their failure conditions and are still pending. The engine reports this itself at
+[`/evidence/history`](https://vayu-console-api.onrender.com/evidence/history), and the console
+shows the pending ones as pending rather than quietly rounding them up.
+
+| Experiment         | Date         | Scope                           | Result                                                                                                                                                                                                                                                                                         |
+| ------------------ | ------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **COVID lockdown** | Mar–Apr 2020 | 47 stations, 901,160 rows       | NO₂ −54.4%, SO₂ −3.7%. NO₂/SO₂ ratio 2.82 → 1.34, **LR 2.11 (weak)**. Power generation stayed essential, so SO₂ held while NO₂ halved — the differential the hypothesis required. **ACCEPTED.**                                                                                                |
+| **Diwali 2019**    | 27 Oct 2019  | 1,604 VIIRS detections that day | Discriminant validity: can the fire module absorb fireworks and misreport them as biomass? VIIRS overpasses Delhi at 12:00–14:00 and 01:00–03:00 IST, outside the 20:00–00:00 firework window, so structurally it should not. **PENDING** — the test that would confirm this has not been run. |
+| **Odd-Even II**    | Apr 2016     | 11 stations                     | The only unconfounded vehicle window. Weak treatment, few stations. **PENDING** — not yet a passed test, and labelled as such in the UI.                                                                                                                                                       |
 
 The COVID test could have failed. It was run as a falsification attempt: had NO₂ not fallen
 relative to SO₂, the traffic module would have been deleted.

@@ -37,6 +37,23 @@ test.describe("console", () => {
     expect(errors, `console errors: ${errors.join(" | ")}`).toEqual([]);
   });
 
+  test("never presents a reconstruction as a live reading", async ({ page }) => {
+    // The scenarios are archived station-hours from 2016-2020. A judge reading
+    // "Severe, 1288 ug/m3, human review required" with no further context would
+    // reasonably take it for current Delhi air, so the screen has to say
+    // otherwise before it says anything else.
+    await page.goto("/console");
+
+    await expect(page.getByText("Historical replay")).toBeVisible();
+    await expect(page.getByText(/Not a live feed/)).toBeVisible();
+    await expect(page.getByText("Incident situation")).toBeVisible();
+
+    // "Current" is the word that would make this a false claim.
+    const body = (await page.locator("body").innerText()).toLowerCase();
+    expect(body).not.toContain("current situation");
+    expect(body).not.toContain("current pm2.5");
+  });
+
   test("fits one screen — the page itself never scrolls", async ({ page }) => {
     await page.goto("/console");
     await expect(page.getByText("Severe")).toBeVisible();
@@ -290,7 +307,7 @@ test.describe("failure and empty states", () => {
 
     // The most important sentence in the product.
     await expect(page.getByText(/not evidence that the air is clean/)).toBeVisible();
-    await expect(page.getByText("Cannot judge").first()).toBeVisible();
+    await expect(page.getByText("Insufficient evidence").first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Why?" })).toHaveCount(0);
   });
 
@@ -400,7 +417,42 @@ test.describe("accessibility", () => {
     const dialog = page.getByRole("dialog");
 
     await expect(dialog).toHaveAttribute("aria-modal", "true");
-    await expect(dialog).toHaveAttribute("aria-label", /Why:/);
+    await expect(dialog).toHaveAttribute("aria-label", /Why this recommendation:/);
+  });
+
+  test("Escape closes the Challenge dialog", async ({ page }) => {
+    // A presenter who cannot dismiss the modal in front of judges is stuck with
+    // it. Escape used to do nothing here.
+    await page.getByRole("button", { name: "Why?" }).first().click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
+  });
+
+  test("opening the Challenge dialog moves focus into it", async ({ page }) => {
+    // Focus used to stay on the button behind the overlay, so a keyboard or
+    // screen-reader user was still reading the page underneath.
+    await page.getByRole("button", { name: "Why?" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    const focusIsInsideDialog = await dialog.evaluate((el) => el.contains(document.activeElement));
+    expect(focusIsInsideDialog).toBe(true);
+  });
+
+  test("the Challenge dialog scrolls inside itself rather than off-screen", async ({ page }) => {
+    // The trace is long. A dialog taller than the viewport hides its own close
+    // button on a laptop screen.
+    await page.getByRole("button", { name: "Why?" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    const fitsViewport = await dialog.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top >= -1 && r.bottom <= window.innerHeight + 1;
+    });
+    expect(fitsViewport).toBe(true);
   });
 
   test("scenario tabs use real tab semantics", async ({ page }) => {

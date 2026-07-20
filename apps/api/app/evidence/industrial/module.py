@@ -56,7 +56,7 @@ class IndustrialEvidenceModule(EvidenceModule):
 
     _ASSUMPTIONS: ClassVar[list[str]] = [
         "SO2 is treated as a marker for point-source combustion (coal power, "
-        "industry). Supported indirectly: SO2 held flat (-6.6%) through the COVID "
+        "industry). Supported indirectly: SO2 held flat (-3.7%) through the COVID "
         "lockdown while NO2 halved (-54.4%), consistent with essential power "
         "generation continuing while distributed sources stopped.",
         "No assumption is made about how much PM2.5 any industrial source "

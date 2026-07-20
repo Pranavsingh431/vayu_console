@@ -234,7 +234,7 @@ class TrafficEvidenceModule(EvidenceModule):
         """Combine ratio and diurnal evidence.
 
         Capped at MODERATE regardless of what the observations show. The COVID
-        calibration measured LR 1.93 — weak — so this module has no basis to ever
+        calibration measured LR 2.11 — weak — so this module has no basis to ever
         claim strong evidence. The cap is the measurement, enforced in code.
         """
         if lr is None:

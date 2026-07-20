@@ -122,14 +122,7 @@ export function StationMap({
           const [x] = project(lon, SOUTH);
           return (
             <g key={lon}>
-              <line
-                x1={x}
-                y1={0}
-                x2={x}
-                y2={H}
-                className="stroke-slate-200 dark:stroke-slate-800"
-                strokeWidth={1}
-              />
+              <line x1={x} y1={0} x2={x} y2={H} className="stroke-[#161616]" strokeWidth={1} />
               <text x={x + 3} y={H - 5} className="fill-[#3F3F46] text-[9px]">
                 {lon}°E
               </text>
@@ -140,14 +133,7 @@ export function StationMap({
           const [, y] = project(WEST, lat);
           return (
             <g key={lat}>
-              <line
-                x1={0}
-                y1={y}
-                x2={W}
-                y2={y}
-                className="stroke-slate-200 dark:stroke-slate-800"
-                strokeWidth={1}
-              />
+              <line x1={0} y1={y} x2={W} y2={y} className="stroke-[#161616]" strokeWidth={1} />
               <text x={4} y={y - 4} className="fill-[#3F3F46] text-[9px]">
                 {lat}°N
               </text>

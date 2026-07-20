@@ -172,3 +172,18 @@ export const HYPOTHESIS_LABEL: Record<Hypothesis, string> = {
   traffic: "Traffic",
   industrial: "Industry / Power",
 };
+
+/**
+ * How the data behind a hypothesis is described in the UI.
+ *
+ * Written out rather than derived from the enum: templating the raw value
+ * produced "data no data" on screen, which reads as an unfinished string rather
+ * than the deliberate statement it is.
+ */
+export const QUALITY_LABEL: Record<EvidenceQuality, string> = {
+  no_data: "No data",
+  poor: "Poor data",
+  fair: "Fair data",
+  good: "Good data",
+  high: "High-quality data",
+};

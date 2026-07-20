@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { RecommendationPanel } from "@/components/recommendation-panel";
 import { PresentationProgress, ScenarioBar } from "@/components/scenario-bar";
-import { SituationHeader } from "@/components/situation-header";
+import { ReplayBanner, SituationHeader } from "@/components/situation-header";
 import { StationMap } from "@/components/station-map";
 import { Timeline } from "@/components/timeline";
 import { api, ApiUnreachableError, queryKeys } from "@/lib/api";
@@ -53,6 +53,7 @@ function Panel({
 function Skeleton() {
   return (
     <div className="flex h-dvh flex-col bg-black">
+      <div className="h-[29px] animate-pulse border-b border-[#1C1C1C] bg-[#111111]" />
       <div className="h-[68px] animate-pulse border-b border-[#1C1C1C] bg-[#0A0A0A]" />
       <div className="h-[45px] animate-pulse border-b border-[#1C1C1C] bg-black" />
       <div className="grid flex-1 grid-cols-12 gap-3 p-3">
@@ -160,6 +161,8 @@ export function ConsoleView() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-black">
+      {/* Before anything else: this is a reconstruction, not a live feed. */}
+      <ReplayBanner scenario={scenario} evidence={evidence.data} />
       <SituationHeader evidence={evidence.data} decision={decision.data} />
       <ScenarioBar active={scenario} onSelect={onSelect} presentation={presentation} />
       <PresentationProgress presentation={presentation} />

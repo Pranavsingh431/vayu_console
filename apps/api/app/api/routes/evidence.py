@@ -42,8 +42,8 @@ _IDENTIFICATION_NOTES: dict[str, str] = {
     ),
     "traffic": (
         "Weakly identified. No signal exists outside the chemistry being explained. "
-        "Calibrated against the COVID lockdown (NO2 -51.5%, SO2 -6.6%), which "
-        "measured a likelihood ratio of 1.93 — weak. Lockdown also halted "
+        "Calibrated against the COVID lockdown (NO2 -54.4%, SO2 -3.7%), which "
+        "measured a likelihood ratio of 2.11 — weak. Lockdown also halted "
         "construction and industry, so that ratio is an upper bound."
     ),
     "industrial": (
